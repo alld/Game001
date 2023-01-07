@@ -15,12 +15,6 @@ public class Data_BasicUnitData
         Hero
     }
 
-    public enum AIType
-    {
-        Attacker,
-        Defender,
-    }
-
     public enum UnitType
     {
         Human,
@@ -38,6 +32,7 @@ public class Data_BasicUnitData
     {
         public int ID;
         public ObjectType objectType;
+        public UnitType unitType;
 
         public int TeamNumber;
         public int level;
@@ -55,13 +50,16 @@ public class Data_BasicUnitData
         public float moveSpeed;
         public List<Buff> buffState;
 
-        public AIType aIType;
-        public UnitType unitType;
+        private int defaultPriority;
+        private float defaultCognitiveRange;
+        public float _cognitveRange;
+        public int _currnetPriority;
 
         public UnitState(int ID)
         {
             this.ID = ID;
             this.objectType = ObjectType.Unit;
+            this.unitType = UnitType.Human;
 
             this.TeamNumber = 0;
             this.level = 0;
@@ -78,9 +76,10 @@ public class Data_BasicUnitData
             this.moveSpeed = 10;
             this.buffState = new List<Buff>();
 
-            this.aIType = AIType.Attacker;
-            this.unitType = UnitType.Human;
-
+            this.defaultPriority = 10;
+            this.defaultCognitiveRange = 0;
+            this._cognitveRange = 0;
+            this._currnetPriority = 10;
         }
 
     }

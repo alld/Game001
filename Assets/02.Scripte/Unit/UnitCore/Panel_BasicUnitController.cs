@@ -7,5 +7,5 @@ public class Panel_BasicUnitController : MonoBehaviour
 {
     // °í·Á
     public Data_NormalUnit.UnitState unitState = new Data_NormalUnit.UnitState(4);
-    
+    public Graphic_BasicUnitAI AI = new Graphic_BasicUnitAI();
 }

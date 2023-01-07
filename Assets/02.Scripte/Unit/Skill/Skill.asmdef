@@ -1,0 +1,16 @@
+{
+    "name": "Skill",
+    "rootNamespace": "",
+    "references": [
+        "GUID:9ff43caa323074046af870a85c22627a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

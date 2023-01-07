@@ -1,0 +1,18 @@
+{
+    "name": "Story",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d31329e9b545ba04fbe7c3a55a07a037",
+        "GUID:5ae1a9622a94ce142a3f90f306756f6b",
+        "GUID:4c0003bfe9068484a8a19f077ab43001"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

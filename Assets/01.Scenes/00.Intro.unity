@@ -496,9 +496,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameVersion: 0.02
   _teamSetting: {fileID: 1710661849}
   _logManager: {fileID: 1836118789}
-  gameVersion: 0.01
 --- !u!4 &673120280
 Transform:
   m_ObjectHideFlags: 0
