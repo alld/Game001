@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void GameInit()
     {
+        _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt";
+
         _teamSetting.CheckPlayerTeam(); // 팀설정이 제대로되어있는지 확인합니다. 
 
         ChangeScene(SceneN.Main); // 모든 설정이 끝나면 메인씬을 불러옵니다.

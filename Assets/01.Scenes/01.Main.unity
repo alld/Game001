@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 163062716}
   - component: {fileID: 163062715}
   - component: {fileID: 163062714}
+  - component: {fileID: 163062719}
   m_Layer: 0
   m_Name: TempUnit (1)
   m_TagString: Untagged
@@ -190,6 +191,7 @@ MonoBehaviour:
   unitState:
     ID: 2
     objectType: 0
+    unitType: 0
     TeamNumber: 0
     level: 0
     exp: 0
@@ -202,8 +204,10 @@ MonoBehaviour:
     offensivePoint: 0
     moveSpeed: 10
     buffState: 
-    aIType: 0
-    unitType: 0
+    _cognitveRange: 0
+    _currnetPriority: 10
+  AI:
+    _type: 0
 --- !u!65 &163062716
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -267,6 +271,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 163062712}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!143 &163062719
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163062712}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &222574501
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,6 +303,7 @@ GameObject:
   - component: {fileID: 222574504}
   - component: {fileID: 222574503}
   - component: {fileID: 222574507}
+  - component: {fileID: 222574508}
   m_Layer: 0
   m_Name: TempUnit
   m_TagString: Untagged
@@ -318,6 +341,7 @@ MonoBehaviour:
   unitState:
     ID: 2
     objectType: 0
+    unitType: 0
     TeamNumber: 1
     level: 0
     exp: 0
@@ -330,8 +354,10 @@ MonoBehaviour:
     offensivePoint: 0
     moveSpeed: 10
     buffState: 
-    aIType: 0
-    unitType: 0
+    _cognitveRange: 0
+    _currnetPriority: 10
+  AI:
+    _type: 0
 --- !u!65 &222574504
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -411,6 +437,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!143 &222574508
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 222574501}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &676268894
 GameObject:
   m_ObjectHideFlags: 0
