@@ -28,6 +28,15 @@ public class Global_LogManager : MonoBehaviour
     public bool _record = true;
     public bool _overwrite = false;
 
+
+    /// <summary>
+    /// (기능) 
+    /// <br>개발과정에서 예측 가능한 설정들을 로그 기록으로 남깁니다.</br>
+    /// <br>해당 기능들은 예외처리로 일정부분 대응이 되어있으나 </br>
+    /// <br>제대로된 데이터가 할당되어있지 않을 가능성이 높습니다.</br>
+    /// <br>로그가 발생한 문제들은 추후 이슈 대응을 필요로합니다.</br>
+    /// </summary>
+    /// <param name="error"></param>
     public void InputErrorLog(ErrorKind error)
     {
         SB.Clear();
@@ -52,6 +61,9 @@ public class Global_LogManager : MonoBehaviour
         RecordLog();
     }
 
+    /// <summary>
+    /// (기능) <br>발생한 로그들을 파일에 모두 기록시킵니다. </br>
+    /// </summary>
     private void RecordLog()
     {
         if (_record == false) return;

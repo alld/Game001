@@ -36,22 +36,22 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// (기능) 
-    /// 게임이 처음 로드되면서 필요한 값들을 설정해줍니다. 
-    /// 설정이 끝나면 메인씬으로 전환됩니다. 
+    /// (기능)
+    /// <br>게임이 처음 로드되면서 필요한 값들을 설정해줍니다. </br>
+    /// <br>설정이 끝나면 메인씬으로 전환됩니다. </br>
     /// </summary>
     private void GameInit()
     {
-        _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt";
+        _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt"; // 로그매니저의 텍스트파일 저장경로를 지정합니다. 
 
         _teamSetting.CheckPlayerTeam(); // 팀설정이 제대로되어있는지 확인합니다. 
 
         ChangeScene(SceneN.Main); // 모든 설정이 끝나면 메인씬을 불러옵니다.
     }
-    
+
     /// <summary>
-    /// (기능)
-    /// 원하는 씬으로 전환시키는 함수입니다. 
+    /// (기능) 
+    /// <br>원하는 씬으로 전환시키는 함수입니다. </br>
     /// </summary>
     /// <param name="sceneName">전환하고자 하는 씬을 지정해줍니다. </param>
     /// <param name="addScene">현재 씬에 다른씬을 추가할지를 결정합니다. </param>

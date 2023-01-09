@@ -37,8 +37,8 @@ public class Global_TeamSetting : MonoBehaviour
 
     /// <summary>
     /// (기능) 
-    /// 플레이어 팀이 제대로 설정되어있는지 확인합니다. 
-    /// 잘못된 값이 설정되어 있다면 기본값으로 조정됩니다. 
+    /// <br>플레이어 팀이 제대로 설정되어있는지 확인합니다. </br>
+    /// <br>잘못된 값이 설정되어 있다면 기본값으로 조정됩니다. </br>
     /// </summary>
     /// <returns></returns>
     public bool CheckPlayerTeam()
@@ -73,8 +73,8 @@ public class Global_TeamSetting : MonoBehaviour
 
     /// <summary>
     /// (예외처리 대응) 
-    /// 플레이어 별로 팀설정 수가 맞지 않을 경우 디폴트값으로 설정합니다. 
-    /// 해당 함수가 실행될 경우 제대로된 작동이 아니기때문에 에러로그가 수집됩니다.
+    /// <br>플레이어 별로 팀설정 수가 맞지 않을 경우 디폴트값으로 설정합니다. </br>
+    /// <br>해당 함수가 실행될 경우 제대로된 작동이 아니기때문에 에러로그가 수집됩니다.</br>
     /// </summary>
     /// <returns></returns>
     private bool RestoreTeamSetting()
