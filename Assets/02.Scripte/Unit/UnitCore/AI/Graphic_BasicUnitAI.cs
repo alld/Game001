@@ -1,17 +1,25 @@
+using Codice.Client.BaseCommands;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 [System.Serializable]
 public class Graphic_BasicUnitAI : MonoBehaviour
 {
+    private const string tag_Trigger = "Trigger";
 
     #region 캐시처리
+    [HideInInspector] public Panel_BasicUnitController unit;
     private CharacterController unitCtrl = null;
-    [HideInInspector]
-    public GameObject _thisObject = null;
+    [HideInInspector] public GameObject _targetObject = null;
     private WaitForSeconds delayTime = null;
     private WaitForSeconds awakeCheekTime = null;
+    [HideInInspector] public SphereCollider _cognitiveRange = null;
     #endregion
 
     [Range(0.01f, 2f)]
@@ -19,17 +27,23 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     [Range(0.5f, 5f)]
     public float _loopSleepDelay = 3.0f;
 
-    public AIType _type = AIType.A;
+    public eAIType _type = eAIType.Normal;
     protected List<ActionInfo> _actionList = new List<ActionInfo>();
-    protected List<Pattern> _scheduler = new List<Pattern>();
+    protected List<ePattern> _scheduler = new List<ePattern>();
     protected IEnumerator _currentPattern = null;
     protected bool isSkip = false;
+
+    public int test = 0;
+    protected List<Panel_BasicUnitController> _Info_nearbyUnits = new List<Panel_BasicUnitController>();
+    protected List<Panel_BasicUnitController> _Info_nearbyTeam = new List<Panel_BasicUnitController>();
+    protected List<Panel_BasicUnitController> _Info_nearbyEnemy = new List<Panel_BasicUnitController>();
+
 
     public struct ActionInfo
     {
         public bool ExitEvent;
         public int _targetID;
-        public Action _kind;
+        public eAction _kind;
 
         public Vector3 _targetPositison;
         public Vector3 _position;
@@ -43,7 +57,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         {
             this.ExitEvent = false;
             this._targetID = target.GetInstanceID();
-            this._kind = Action.Idle;
+            this._kind = eAction.Idle;
 
             this._position = position;
             this._targetPositison = target.transform.position;
@@ -65,14 +79,17 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         }
     }
     #region 타입 설정
-    public enum AIType
+    public enum eAIType
     {
-        A = 0,
-        B,
-        C
+        Normal = 0, // 일반
+        UnArmed,    // 비무장
+        Passive,    // 수동적
+        Active,     // 적극적
+        Aggressive, // 공격적
+        Defensive   // 수비적
     }
 
-    public enum Pattern
+    public enum ePattern
     {
         Continue = 0,
         Attacking,
@@ -87,7 +104,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         Stand
     }
 
-    public enum Action
+    public enum eAction
     {
         Idle = 0,
         Move,
@@ -104,61 +121,66 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         delayTime = new WaitForSeconds(_loopCheckDelay);
         awakeCheekTime = new WaitForSeconds(_loopSleepDelay);
+
+        unit = GetComponent<Panel_BasicUnitController>();
+        _cognitiveRange = GetComponentInChildren<SphereCollider>();
+
     }
 
 
     #region 스케쥴러 관리
-    public Pattern PatternSearch() // 작성중
+    public ePattern PatternSearch() // 작성중
     {
-        return Pattern.Stand;
+        DataCollection();
+        return ePattern.Stand;
     }
 
-    public bool AutoScheduler(Pattern AIPattern, bool rightoff = false)
+    public bool AutoScheduler(ePattern AIPattern, bool rightoff = false)
     {
-        if (Pattern.Death == AIPattern) // 사망처리는 어떤것보다 우선처리되어야해서 별도 제어됩니다. 
+        if (ePattern.Death == AIPattern) // 사망처리는 어떤것보다 우선처리되어야해서 별도 제어됩니다. 
         {
             ImmediateInterruption();
             _currentPattern = PT_Death();
             StartCoroutine(_currentPattern);
             return false;
         }
-        else if (Pattern.Continue == AIPattern)
+        else if (ePattern.Continue == AIPattern)
         {
             switch (_scheduler[0])
             {
-                case Pattern.Attacking:
+                case ePattern.Attacking:
                     _currentPattern = PT_Attacking();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Avoidng:
+                case ePattern.Avoidng:
                     _currentPattern = PT_Avoidng();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.RunningAway:
+                case ePattern.RunningAway:
                     _currentPattern = PT_RunningAway();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Flollow:
+                case ePattern.Flollow:
                     _currentPattern = PT_Flollow();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Push:
+                case ePattern.Push:
                     _currentPattern = PT_Push();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Stern:
+                case ePattern.Stern:
                     _currentPattern = PT_Stern();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Skill:
+                case ePattern.Skill:
                     _currentPattern = PT_Skill();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Resurrection:
+                case ePattern.Resurrection:
                     _currentPattern = PT_Resurrection();
                     StartCoroutine(_currentPattern);
                     break;
-                case Pattern.Stand:
+                case ePattern.Stand:
                     _currentPattern = PT_Stand();
                     StartCoroutine(_currentPattern);
                     break;
@@ -171,7 +193,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         if (_scheduler.Count == 0) // 스케쥴러가 비어있으면 즉시성과 상관없이 바로 실행합니다. 
         {
             _scheduler.Add(AIPattern);
-            return AutoScheduler(Pattern.Continue);
+            return AutoScheduler(ePattern.Continue);
         }
         else if (rightoff == true)
         // 즉시 실행인 경우 현재 진행중인 액션을 멈추는 로직을 실행시키고, 끝나면 바로 추가된 액션을 진행합니다. 
@@ -198,8 +220,14 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     public void ActionEnd()
     {
         isSkip = false;
+        _targetObject = null;
 
-        if(_currentPattern == null)
+        foreach (var action in _actionList)
+        {
+            if (action.ExitEvent == true) _actionList.Remove(action);
+        }
+
+        if (_currentPattern == null)
         {
             StopCoroutine(_currentPattern);
             _currentPattern = null;
@@ -209,7 +237,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         if (_scheduler.Count != 0)
         {
             _scheduler.RemoveAt(0);
-            AutoScheduler(Pattern.Continue);
+            AutoScheduler(ePattern.Continue);
         }
     }
 
@@ -236,6 +264,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 패턴
     protected IEnumerator PT_Attacking()
     {
+
         yield return null;
 
         ActionEnd();
@@ -279,22 +308,93 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// <returns></returns>
     protected IEnumerator PT_Stand()
     {
-        Pattern checkPattern = Pattern.Stand;
-        while(checkPattern == Pattern.Stand)
+        ePattern checkPattern = ePattern.Stand;
+        while (checkPattern == ePattern.Stand)
         {
             yield return awakeCheekTime;
             if (isSkip == true) break;
             checkPattern = PatternSearch();
         }
 
-        if(checkPattern != Pattern.Stand) AutoScheduler(checkPattern);
+        if (checkPattern != ePattern.Stand) AutoScheduler(checkPattern);
         ActionEnd();
     }
 
 
     #region 패턴 내부로직
+    /// <summary>
+    /// (기능)
+    /// <br> AI가 판단하는데 필요한 모든 자료를 셋팅합니다. </br>
+    /// </summary>
+    protected void DataCollection()
+    {
+        if(_Info_nearbyUnits.Count == 0)
+        {
+            _targetObject = null;
+            _actionList.Insert(0, new ActionInfo());
+            return;
+        }
+        var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currnetPriority).Select(Team => Team).FirstOrDefault();
+        var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currnetPriority).Select(Enemy => Enemy).FirstOrDefault();
 
-    #endregion 
+        _actionList.Insert(0, new ActionInfo(_targetObject, gameObject.transform.position));
+
+        _Info_nearbyEnemy[0].unitState._currnetPriority = 0;
+
+        List<Panel_BasicUnitController> temp1 = _Info_nearbyEnemy.OrderBy(x => x.unitState._currnetPriority).ToList();
+        Debug.Log(temp1.Count);
+
+
+        // 해당 유닛들의 정보를 토대로 린큐로 정리시킴. 우선도 / 체력, 위력 / 심플버전 / 디테일버전 (성격으로 구분) / 공포,사기와같은 수치적용 / 지능수치적용
+    }
+
+    public IEnumerable<Panel_BasicUnitController> SearchTargetTeamUnit = null;
+    public IEnumerable<Panel_BasicUnitController> SearchTargetEnemyUnit = null;
+
+    private Panel_BasicUnitController tempVar_Unit;
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag(tag_Trigger) == true) return;
+        if (other.gameObject.GetInstanceID() == this.gameObject.GetInstanceID()) return;
+        if (other.TryGetComponent<Panel_BasicUnitController>(out tempVar_Unit) == false) 
+        {
+            GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.AIMissingComponent);
+            return;
+        }
+        _Info_nearbyUnits.Add(tempVar_Unit);
+        if(GameManager._instance._teamSetting.GetTeamStatus(unit.unitState.TeamNumber ,tempVar_Unit.unitState.TeamNumber) == true)
+        {
+            _Info_nearbyTeam.Add(tempVar_Unit);
+        }
+        if (GameManager._instance._teamSetting.GetEnemyStatus(unit.unitState.TeamNumber, tempVar_Unit.unitState.TeamNumber) == true)
+        {
+            _Info_nearbyEnemy.Add(tempVar_Unit);
+        }
+        tempVar_Unit = null;
+
+
+        //List<Panel_BasicUnitController> temp1 = _Info_nearbyTeam.OrderByDescending(x => x.unitState._currnetPriority).ToList();
+        //Debug.Log(temp1[0].unitState._currnetPriority + ": " + temp1[0].gameObject.name);
+        //temp1.Clear();
+
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag(tag_Trigger) == true) return;
+        if (other.gameObject.GetInstanceID() == this.gameObject.GetInstanceID()) return;
+        if (other.TryGetComponent<Panel_BasicUnitController>(out tempVar_Unit) == false)
+        {
+            GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.AIMissingComponent);
+            return;
+        }
+
+        _Info_nearbyUnits.Remove(tempVar_Unit);
+        _Info_nearbyTeam.Remove(tempVar_Unit);
+        _Info_nearbyEnemy.Remove(tempVar_Unit);
+        tempVar_Unit = null;
+    }
+    #endregion
 
     #endregion
 
@@ -305,7 +405,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         if (action.ExitEvent == true)
         {
-            return AutoScheduler(Pattern.Continue);
+            return AutoScheduler(ePattern.Continue);
         }
         unitCtrl.Move(action.TargetDirectionVec3());
         return false;

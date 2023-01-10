@@ -30,9 +30,21 @@ public class Global_TeamSetting : MonoBehaviour
         public List<bool> _isEnemy;
     }
 
-    private void Awake()
+    public void Init()
     {
         playerCount = _players.Count;
+
+        CheckPlayerTeam();
+    }
+
+    public bool GetTeamStatus(int self, int other)
+    {
+        return _players[self]._isTeam[other];
+    }
+
+    public bool GetEnemyStatus(int self, int other)
+    {
+        return _players[self]._isEnemy[other];
     }
 
     /// <summary>
@@ -45,7 +57,7 @@ public class Global_TeamSetting : MonoBehaviour
     {
         bool tryChange = false;
         for (int i = 0; i < _players.Count; i++)
-        {
+        {            
             if ((_players[i]._isTeam.Count != _players[i]._isEnemy.Count) || (_players[i]._isTeam.Count == 0)) // 팀설정된 플레이어수가 일치하지않는 경우
             {
                 return RestoreTeamSetting();

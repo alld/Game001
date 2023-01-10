@@ -12,6 +12,7 @@ namespace EnumError
     {
         TeamSettingError,
         TeamMisMatchError,
+        AIMissingComponent
     }
 }
 
@@ -49,13 +50,16 @@ public class Global_LogManager : MonoBehaviour
             case ErrorKind.TeamMisMatchError:
                 SB.Append(": 플레이어의 팀과 적의 수가 알맞게 설정되어있지 않습니다.");
                 break;
+            case ErrorKind.AIMissingComponent:
+                SB.Append(": AI의 유닛탐지 과정에서 컴포넌트 설정이 안된유닛이 존재합니다.");
+                break;
         }
         SB.Append(": date : ");
         SB.Append(DateTime.Now);
         log.Add(SB.ToString());
         if (putLog == true)
         {
-            Debug.Log(log[(int)error]);
+            Debug.Log(log[log.Count-1]);
         }
 
         RecordLog();

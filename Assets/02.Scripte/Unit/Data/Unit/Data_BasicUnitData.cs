@@ -77,8 +77,8 @@ public class Data_BasicUnitData
             this.buffState = new List<Buff>();
 
             this.defaultPriority = 10;
-            this.defaultCognitiveRange = 0;
-            this._cognitveRange = 0;
+            this.defaultCognitiveRange = 8f;
+            this._cognitveRange = 8f;
             this._currnetPriority = 10;
         }
 

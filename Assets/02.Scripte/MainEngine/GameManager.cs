@@ -6,8 +6,9 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public string gameVersion = "0.00";
+    public static bool FinishSetting = false; 
 
-    private enum SceneN
+    public enum SceneN
     {
         Intro,
         Main
@@ -30,7 +31,7 @@ public class GameManager : MonoBehaviour
             _instance = this;
             DontDestroyOnLoad(this.gameObject);
         }
-        else { Destroy(this); }
+        else { Destroy(this.gameObject); }
 
         GameInit();
     }
@@ -44,9 +45,9 @@ public class GameManager : MonoBehaviour
     {
         _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt"; // 로그매니저의 텍스트파일 저장경로를 지정합니다. 
 
-        _teamSetting.CheckPlayerTeam(); // 팀설정이 제대로되어있는지 확인합니다. 
+        _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
-        ChangeScene(SceneN.Main); // 모든 설정이 끝나면 메인씬을 불러옵니다.
+        FinishSetting = true; // 모든 설정이 끝나면 메인씬을 불러옵니다.
     }
 
     /// <summary>
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="sceneName">전환하고자 하는 씬을 지정해줍니다. </param>
     /// <param name="addScene">현재 씬에 다른씬을 추가할지를 결정합니다. </param>
-    private void ChangeScene(SceneN sceneName, bool addScene = false)
+    public void ChangeScene(SceneN sceneName, bool addScene = false)
     {
         string changeSceneName = this.sceneName[(int)sceneName];
         if (addScene == true)
