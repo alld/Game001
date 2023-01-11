@@ -847,6 +847,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1904746495449514048, guid: 0c42024420c014842aa1ab7b01afd8e0, type: 3}
+      propertyPath: _record
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1904746496601862995, guid: 0c42024420c014842aa1ab7b01afd8e0, type: 3}
       propertyPath: m_Name
       value: GameMaster

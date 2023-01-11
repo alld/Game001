@@ -22,8 +22,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     [HideInInspector] public SphereCollider _cognitiveRange = null;
     #endregion
 
-    [Range(0.01f, 2f)]
-    public float _loopCheckDelay = 0.01f;
+    [Range(0.1f, 2f)]
+    public float _loopCheckDelay = 0.1f;
     [Range(0.5f, 5f)]
     public float _loopSleepDelay = 3.0f;
 
@@ -33,49 +33,44 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     protected IEnumerator _currentPattern = null;
     protected bool isSkip = false;
 
-    public int test = 0;
     protected List<Panel_BasicUnitController> _Info_nearbyUnits = new List<Panel_BasicUnitController>();
     protected List<Panel_BasicUnitController> _Info_nearbyTeam = new List<Panel_BasicUnitController>();
     protected List<Panel_BasicUnitController> _Info_nearbyEnemy = new List<Panel_BasicUnitController>();
 
 
-    public struct ActionInfo
+    public class ActionInfo
     {
         public bool ExitEvent;
         public int _targetID;
         public eAction _kind;
-
-        public Vector3 _targetPositison;
-        public Vector3 _position;
+        public GameObject _targetObject;
 
         public void SetExitEvent()
         {
             ExitEvent = true;
         }
 
-        public ActionInfo(GameObject target, Vector3 position)
+        public ActionInfo(GameObject target)
         {
+            this._targetObject = target;
             this.ExitEvent = false;
             this._targetID = target.GetInstanceID();
             this._kind = eAction.Idle;
-
-            this._position = position;
-            this._targetPositison = target.transform.position;
         }
 
-        public float TargetDistance()
+        public float TargetDistance(Vector3 position)
         {
-            return Vector3.Distance(this._targetPositison, this._position);
+            return Vector3.Distance(this._targetObject.transform.position, position);
         }
 
-        public Vector3 TargetDirectionVec3()
+        public Vector3 TargetDirectionVec3(Vector3 position)
         {
-            return this._targetPositison - this._position;
+            return this._targetObject.transform.position - position;
         }
 
         public Quaternion TargetDirectionQuat()
         {
-            return Quaternion.LookRotation(this._targetPositison);
+            return Quaternion.LookRotation(this._targetObject.transform.position);
         }
     }
     #region 타입 설정
@@ -227,7 +222,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             if (action.ExitEvent == true) _actionList.Remove(action);
         }
 
-        if (_currentPattern == null)
+        if (_currentPattern != null)
         {
             StopCoroutine(_currentPattern);
             _currentPattern = null;
@@ -264,8 +259,13 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 패턴
     protected IEnumerator PT_Attacking()
     {
+        while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
+        {
+            Action_Move(_actionList[0]);
+            if (isSkip == true) break;
+            yield return delayTime;
+        }
 
-        yield return null;
 
         ActionEnd();
     }
@@ -328,55 +328,53 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// </summary>
     protected void DataCollection()
     {
-        if(_Info_nearbyUnits.Count == 0)
+        if (_Info_nearbyUnits.Count == 0) // 주변에 유닛이 없는 경우
         {
             _targetObject = null;
-            _actionList.Insert(0, new ActionInfo());
+            _actionList.Insert(0, new ActionInfo(gameObject));
             return;
         }
-        var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currnetPriority).Select(Team => Team).FirstOrDefault();
-        var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currnetPriority).Select(Enemy => Enemy).FirstOrDefault();
+        var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
+        var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
 
-        _actionList.Insert(0, new ActionInfo(_targetObject, gameObject.transform.position));
+        _targetObject = (temp_Enemy.unitState._currentPriority > temp_Team.unitState._currentPriority) ? temp_Team.gameObject : temp_Enemy.gameObject;
+        _actionList.Insert(0, new ActionInfo(_targetObject));
 
-        _Info_nearbyEnemy[0].unitState._currnetPriority = 0;
+        _Info_nearbyEnemy[0].unitState._currentPriority = 0;
 
-        List<Panel_BasicUnitController> temp1 = _Info_nearbyEnemy.OrderBy(x => x.unitState._currnetPriority).ToList();
-        Debug.Log(temp1.Count);
+        //List<Panel_BasicUnitController> temp1 = _Info_nearbyEnemy.OrderBy(x => x.unitState._currnetPriority).ToList();
 
 
         // 해당 유닛들의 정보를 토대로 린큐로 정리시킴. 우선도 / 체력, 위력 / 심플버전 / 디테일버전 (성격으로 구분) / 공포,사기와같은 수치적용 / 지능수치적용
+        // 상대방의 위치 정보를 부여 (층이 다른 곳에 유닛이 잇으면 해당 탐지에서 분리  (주변적을 우선 타격, 주변적이 없을경우 다른위치에잇는 유닛을 향해 이동)
+        // 정신 능력치 (공포수치가 정신능력치보다 높을경우 성격에 따라 다른 양상 부여 (패닉 / 도주 등)
+        // 공격대상이 아닌, 공격받는중이라면 우선도 퍼센트로 감소 
+        // 공격방식 판단 // 이동 (동선 계산 방법 포함)// 스킬유무 판단 
+        // 수비적인성향들은 진영을 유지하려고함. 아군으로부터 크게벗어나지않는방향 (적이 도망간다고 쫓아가지않음) 
+        // 적극적인 경우 아군이공격 받을경우 영향을 받음 해당유닛을 공격하고자함
+        // 우선도가 공격을 가하면 데미지량에 비례하여 가중치가 부여됨(자신을 공격하는 대상을 공격하는걸 구현할 방법 구상)
     }
-
-    public IEnumerable<Panel_BasicUnitController> SearchTargetTeamUnit = null;
-    public IEnumerable<Panel_BasicUnitController> SearchTargetEnemyUnit = null;
 
     private Panel_BasicUnitController tempVar_Unit;
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(tag_Trigger) == true) return;
         if (other.gameObject.GetInstanceID() == this.gameObject.GetInstanceID()) return;
-        if (other.TryGetComponent<Panel_BasicUnitController>(out tempVar_Unit) == false) 
+        if (other.TryGetComponent<Panel_BasicUnitController>(out tempVar_Unit) == false)
         {
             GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.AIMissingComponent);
             return;
         }
         _Info_nearbyUnits.Add(tempVar_Unit);
-        if(GameManager._instance._teamSetting.GetTeamStatus(unit.unitState.TeamNumber ,tempVar_Unit.unitState.TeamNumber) == true)
+        if (GameManager._instance._teamSetting.GetTeamStatus(unit.unitState._TeamNumber, tempVar_Unit.unitState._TeamNumber) == true)
         {
             _Info_nearbyTeam.Add(tempVar_Unit);
         }
-        if (GameManager._instance._teamSetting.GetEnemyStatus(unit.unitState.TeamNumber, tempVar_Unit.unitState.TeamNumber) == true)
+        if (GameManager._instance._teamSetting.GetEnemyStatus(unit.unitState._TeamNumber, tempVar_Unit.unitState._TeamNumber) == true)
         {
             _Info_nearbyEnemy.Add(tempVar_Unit);
         }
         tempVar_Unit = null;
-
-
-        //List<Panel_BasicUnitController> temp1 = _Info_nearbyTeam.OrderByDescending(x => x.unitState._currnetPriority).ToList();
-        //Debug.Log(temp1[0].unitState._currnetPriority + ": " + temp1[0].gameObject.name);
-        //temp1.Clear();
-
     }
 
     private void OnTriggerExit(Collider other)
@@ -401,14 +399,21 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #endregion
 
     #region 유닛 동작
-    protected bool Action_Move(ActionInfo action) // 작성중
+    protected void Action_Move(ActionInfo action) // 작성중
     {
         if (action.ExitEvent == true)
         {
-            return AutoScheduler(ePattern.Continue);
+            AutoScheduler(ePattern.Continue);
+            return;
         }
-        unitCtrl.Move(action.TargetDirectionVec3());
-        return false;
+        unitCtrl.Move(action.TargetDirectionVec3(gameObject.transform.position));
+    }
+
+    protected void Action_Attack(ActionInfo action) // 작성중
+    {
+        if (action.ExitEvent == true)
+        {
+        }
     }
     #endregion
 

@@ -96,22 +96,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitState:
     ID: 2
-    objectType: 0
-    unitType: 0
-    TeamNumber: 1
-    level: 0
-    exp: 0
+    _objectType: 0
+    _unitType: 0
+    _TeamNumber: 0
+    _level: 0
+    _exp: 0
+    _isLive: 0
     maxHP: 10
-    HP: 10
+    _HP: 0
     maxMP: 10
-    MP: 10
-    price_gold: 0
-    defensivePoint: 0
-    offensivePoint: 0
-    moveSpeed: 10
-    buffState: 
+    _MP: 0
+    _price_gold: 0
+    _attackRange: 0
+    _defensivePoint: 0
+    _offensivePoint: 0
+    _moveSpeed: 0
+    _buffState: 
     _cognitveRange: 0
-    _currnetPriority: 10
+    _currentPriority: 0
+    _addPriority: 0
 --- !u!114 &5356843743929178433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,10 +130,9 @@ MonoBehaviour:
   unit: {fileID: 0}
   _targetObject: {fileID: 0}
   _cognitiveRange: {fileID: 0}
-  _loopCheckDelay: 0.01
+  _loopCheckDelay: 1
   _loopSleepDelay: 3
   _type: 0
-  test: 0
 --- !u!143 &5356843743929178432
 CharacterController:
   m_ObjectHideFlags: 0

@@ -152,6 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.05
+  gameVersion: 0.06
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
