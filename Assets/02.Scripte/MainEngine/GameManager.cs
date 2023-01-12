@@ -48,9 +48,10 @@ public class GameManager : MonoBehaviour
 
         _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
+        _unitManager.Init();
+     
         FinishSetting = true; // 모든 설정이 끝나면 메인씬을 불러옵니다.
 
-        _unitManager.Init();
     }
 
     /// <summary>

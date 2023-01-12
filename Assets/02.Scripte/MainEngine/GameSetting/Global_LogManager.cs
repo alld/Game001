@@ -12,7 +12,8 @@ namespace EnumError
     {
         TeamSettingError,
         TeamMisMatchError,
-        AIMissingComponent
+        AIMissingComponent,
+        DelegateSettingError
     }
 }
 
@@ -52,6 +53,9 @@ public class Global_LogManager : MonoBehaviour
                 break;
             case ErrorKind.AIMissingComponent:
                 SB.Append(": AI의 유닛탐지 과정에서 컴포넌트 설정이 안된유닛이 존재합니다.");
+                break;
+            case ErrorKind.DelegateSettingError:
+                SB.Append(": 델리게이트 설정 과정에서 문제가 있습니다.");
                 break;
         }
         SB.Append(": date : ");

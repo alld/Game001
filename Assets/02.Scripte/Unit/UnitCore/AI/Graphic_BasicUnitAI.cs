@@ -29,7 +29,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
     public eAIType _type = eAIType.Normal;
     protected List<ActionInfo> _actionList = new List<ActionInfo>();
-    protected List<ePattern> _scheduler = new List<ePattern>();
+    [SerializeField]
+    public List<ePattern> _scheduler = new List<ePattern>();
     protected IEnumerator _currentPattern = null;
     protected bool isSkip = false;
 
@@ -39,7 +40,27 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
     private void OnEnable()
     {
+        if (GameManager._instance != null)
+        {
+            GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
+        }
+        else StartCoroutine(StandbyGameManager());
+    }
+
+    /// <summary>
+    /// (예외대응) 
+    /// <br> 에디터에 배치된 유닛들이 게임매니저의 인스턴스 생성과정보다 빠를 경우 이 함수가 실행됩니다. </br>
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator StandbyGameManager()
+    {
+        while (GameManager._instance == null) 
+        {
+            yield return awakeCheekTime;
+        }
+        GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.DelegateSettingError);
         GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
+        AutoScheduler(ePattern.Continue);
     }
 
     private void OnDisable()
@@ -137,6 +158,10 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     public ePattern PatternSearch() // 작성중
     {
         DataCollection();
+
+        //임시
+
+        if (_Info_nearbyEnemy.Count != 0) return ePattern.Attacking;
         return ePattern.Stand;
     }
 
@@ -151,6 +176,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         }
         else if (ePattern.Continue == AIPattern)
         {
+            if (_scheduler.Count == 0) return AutoScheduler(PatternSearch());
             switch (_scheduler[0])
             {
                 case ePattern.Attacking:
@@ -225,7 +251,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     public void ActionEnd()
     {
         isSkip = false;
-        _targetObject = null;
 
         foreach (var action in _actionList)
         {
@@ -269,6 +294,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 패턴
     protected IEnumerator PT_Attacking()
     {
+        _actionList.Insert(0, new ActionInfo(_targetObject));
+
         while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
         {
             Action_Move(_actionList[0]);
@@ -278,11 +305,14 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
         // 리소스 관리 효율성을 위해서 해당 함수를 분리시키는 방법을 검토
         // 1안. Attacking 기능의 종료부분을 분리시켜서, 액션에서 반복하고, 종료됬을때 종료부분을 실행시키는 형태.
+        // 해당 Action_Attack 내부에서 isSkip 기능 체크 
         Action_Attack(_actionList[0]);
         while (_actionList[0].ExitEvent == false)
         {
+            if (isSkip == true) break;
             yield return delayTime;
         }
+        _actionList[0].SetExitEvent();
         ActionEnd();
     }
     protected IEnumerator PT_Avoidng()
@@ -324,6 +354,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// <returns></returns>
     protected IEnumerator PT_Stand()
     {
+        _actionList.Insert(0, new ActionInfo(this.gameObject));
+
         ePattern checkPattern = ePattern.Stand;
         while (checkPattern == ePattern.Stand)
         {
@@ -332,7 +364,9 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             checkPattern = PatternSearch();
         }
 
-        if (checkPattern != ePattern.Stand) AutoScheduler(checkPattern);
+        //if (checkPattern != ePattern.Stand) AutoScheduler(checkPattern);
+        _actionList[0].SetExitEvent();
+
         ActionEnd();
     }
 
@@ -344,19 +378,19 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// </summary>
     protected void DataCollection()
     {
+        _targetObject = null;
+
         if (_Info_nearbyUnits.Count == 0) // 주변에 유닛이 없는 경우
         {
-            _targetObject = null;
-            _actionList.Insert(0, new ActionInfo(gameObject));
             return;
         }
         var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
         var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
 
-        _targetObject = (temp_Enemy.unitState._currentPriority < temp_Team.unitState._currentPriority) ? temp_Team.gameObject : temp_Enemy.gameObject;
-        _actionList.Insert(0, new ActionInfo(_targetObject));
+        _targetObject = (temp_Enemy?.unitState._currentPriority < temp_Team?.unitState._currentPriority) ? temp_Team?.gameObject : temp_Enemy?.gameObject;
+        if (_targetObject == null) _targetObject = this.gameObject;
 
-        _Info_nearbyEnemy[0].unitState._currentPriority = 0;
+        //_Info_nearbyEnemy[0].unitState._currentPriority = 0;
 
         //List<Panel_BasicUnitController> temp1 = _Info_nearbyEnemy.OrderBy(x => x.unitState._currnetPriority).ToList();
 

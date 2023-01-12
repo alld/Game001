@@ -47,16 +47,16 @@ MonoBehaviour:
   _players:
   - _name: "\uD50C\uB808\uC774\uC5B4"
     _number: 0
-    _isTeam: 000000
+    _isTeam: 010000
     _isEnemy: 000101
   - _name: "\uD50C\uB808\uC774\uC5B4\uC720\uB2DB"
     _number: 1
-    _isTeam: 0000
-    _isEnemy: 00
+    _isTeam: 000100
+    _isEnemy: 010001
   - _name: "\uC801"
     _number: 2
-    _isTeam: 
-    _isEnemy: 0000
+    _isTeam: 000001
+    _isEnemy: 010100
 --- !u!1 &1904746495449514049
 GameObject:
   m_ObjectHideFlags: 0
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.07
+  gameVersion: 0.08
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}

@@ -30,6 +30,7 @@ public class Data_BasicUnitData
     public struct UnitState
     {
         /// <summary> 게임오브젝트의 인스턴스 ID을 의미합니다. </summary>
+        [Tooltip("게임오브젝트의 인스턴스 ID을 의미합니다. 임의로 변경하면 안됩니다.")]
         public int ID;
         /// <summary> 유닛, 영웅, 구조물과 같은 오브젝트 형태를 구분합니다. </summary>
         public ObjectType _objectType;
