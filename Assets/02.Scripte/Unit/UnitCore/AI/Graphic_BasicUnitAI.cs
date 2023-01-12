@@ -37,6 +37,16 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     protected List<Panel_BasicUnitController> _Info_nearbyTeam = new List<Panel_BasicUnitController>();
     protected List<Panel_BasicUnitController> _Info_nearbyEnemy = new List<Panel_BasicUnitController>();
 
+    private void OnEnable()
+    {
+        GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
+    }
+
+    private void OnDisable()
+    {
+        GameManager._instance._unitManager.OnStateChangeUnit -= OnChangingEvent;
+    }
+
 
     public class ActionInfo
     {
@@ -266,7 +276,13 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             yield return delayTime;
         }
 
-
+        // 리소스 관리 효율성을 위해서 해당 함수를 분리시키는 방법을 검토
+        // 1안. Attacking 기능의 종료부분을 분리시켜서, 액션에서 반복하고, 종료됬을때 종료부분을 실행시키는 형태.
+        Action_Attack(_actionList[0]);
+        while (_actionList[0].ExitEvent == false)
+        {
+            yield return delayTime;
+        }
         ActionEnd();
     }
     protected IEnumerator PT_Avoidng()
@@ -337,7 +353,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
         var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
 
-        _targetObject = (temp_Enemy.unitState._currentPriority > temp_Team.unitState._currentPriority) ? temp_Team.gameObject : temp_Enemy.gameObject;
+        _targetObject = (temp_Enemy.unitState._currentPriority < temp_Team.unitState._currentPriority) ? temp_Team.gameObject : temp_Enemy.gameObject;
         _actionList.Insert(0, new ActionInfo(_targetObject));
 
         _Info_nearbyEnemy[0].unitState._currentPriority = 0;
@@ -413,6 +429,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         if (action.ExitEvent == true)
         {
+            
         }
     }
     #endregion

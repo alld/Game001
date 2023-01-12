@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     public static GameManager _instance = null;
     public Global_TeamSetting _teamSetting = null;
     public Global_LogManager _logManager = null;
+    public Global_UnitManager _unitManager = null;
 
     private void Awake()
     {
@@ -48,6 +49,8 @@ public class GameManager : MonoBehaviour
         _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
         FinishSetting = true; // 모든 설정이 끝나면 메인씬을 불러옵니다.
+
+        _unitManager.Init();
     }
 
     /// <summary>
