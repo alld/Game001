@@ -1,41 +1,60 @@
-using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 using BuffList;
-using System.Runtime.InteropServices.WindowsRuntime;
-using UnityEditor.Build.Content;
-using System.ComponentModel;
+using Newtonsoft.Json.Linq;
+
+
+// 데이터 테이블 권한 추가 https://docs.google.com/spreadsheets/d/1YYGvfThjJWfS9wk00YisLC0_V8fejFdrBuOVShlCwak/edit?usp=sharing
+// 데이터 테이블 일반 링크 https://docs.google.com/spreadsheets/d/1YYGvfThjJWfS9wk00YisLC0_V8fejFdrBuOVShlCwak/edit#gid=884609330
+
 
 public class Data_BasicUnitData
 {
     /// <summary> 확률 계산에 표준편차를 구하기위한 반복횟수입니다. </summary>
     public static int standardDeviation = 3;
-    public enum ObjectType
+    protected static TextAsset jsonData = Resources.Load<TextAsset>("SettingData/Unit/UnitDataTable");
+    protected static JArray json = JArray.Parse(jsonData.text);
+
+    public enum eAIType
+    {
+        Normal = 0, // 일반
+        UnArmed,    // 비무장
+        Passive,    // 수동적
+        Active,     // 적극적
+        Aggressive, // 공격적
+        Defensive   // 수비적
+    }
+
+    public enum eObjectType
     {
         Unit,
         Structure,
         Hero
     }
 
-    public enum UnitType
+    public enum eUnitType
     {
         Human,
         Orc,
+        Elf,
+        Spirit,
+        Undead
     }
 
     // 능력치 세부종류 힘 지능 민첩 같은것들  , , ,  , , 포인트, 보상정보(아이템, 스킬, 등등)
     [System.Serializable]
     public struct UnitState
     {
-        /// <summary> 게임오브젝트의 인스턴스 ID을 의미합니다. </summary>
-        [Tooltip("게임오브젝트의 인스턴스 ID을 의미합니다. 임의로 변경하면 안됩니다.")]
+        /// <summary> 유닛그룹의 정보를 지니는 제이슨 번호를 의미합니다. </summary>
+        [Tooltip("유닛그룹의 정보를 지니는 제이슨 번호를 의미합니다.임의로 변경하면 안됩니다.")]
         public int ID;
         /// <summary> 유닛, 영웅, 구조물과 같은 오브젝트 형태를 구분합니다. </summary>
-        public ObjectType _objectType;
+        public eObjectType _objectType;
         /// <summary> 종족과 같이 실제 유닛의 타입을 구분합니다. </summary>
-        public UnitType _unitType;
+        public eUnitType _unitType;
+        /// <summary> (AI) 유닛의 성격을 분류합니다. 우선시하는 행동이 달라집니다. </summary>
+        public eAIType _AIType;
 
         /// <summary> 해당 유닛의 소유자를 구분합니다. 적, 아군을 구분하는데 주로 사용됩니다.</summary>
         public int _TeamNumber;
@@ -55,7 +74,7 @@ public class Data_BasicUnitData
         /// <summary> 유닛의 현재 마나입니다.</summary>
         public float _MP;
         /// <summary> 유닛의 판매 가격을 말합니다. 현상금과는 다릅니다.</summary>
-        public float _price_gold;
+        public int _price_gold;
         /// <summary> 유닛의 공격범위를 나타냅니다.</summary>
         public float _attackRange;
 
@@ -86,11 +105,11 @@ public class Data_BasicUnitData
         public int _avoid;
 
         /// <summary> 공격 타입입니다. 공격타입에 따른 상성효과가 존재하여 데미지량의 차이를 발생시킵니다. (배율) </summary>
-        Data_UnitRelationship.eAttackType _attackType;
+        public Data_UnitRelationship.eAttackType _attackType;
         /// <summary> 방어 타입입니다. 방어타입에 따른 상성효과가 존재하여 데미지량의 차이를 발생시킵니다. (배율) </summary>
-        Data_UnitRelationship.eDefendType _defendType;
+        public Data_UnitRelationship.eDefendType _defendType;
         /// <summary> 속성입니다. 공격대상과 방어대상의 속성에 따라 데미지량의 차이를 발생시킵니다. (배율) </summary>
-        Data_UnitRelationship.eProperty _property;
+        public Data_UnitRelationship.eProperty _property;
 
         /// <summary> 급소 방어는 치명타 발생율을 줄여줍니다. 해당수치는 표준편차가 적용되지 않습니다. </summary>
         public int _vitaldefend;
@@ -109,59 +128,64 @@ public class Data_BasicUnitData
         /// <summary> 예리함 수치에 따라서 상대의 방어를 무시할수 있습니다. (가감) </summary>
         public float _sharp;
 
-        /// <summary> AI가 판단하는데 사용되는 공포 수치입니다. 공포수치가 정신보다 높을 경우 해당유닛은 도주행동과 같은 기피행동을 합니다. </summary>
+        /// <summary> (AI) 공포 수치입니다. 공포수치가 정신보다 높을 경우 해당유닛은 도주행동과 같은 기피행동을 합니다. </summary>
         public int _fear;
-        /// <summary> AI가 판단하는데 사용되는 정신 수치입니다. 공포에 대한 저향력을 나타냅니다. </summary>
+        /// <summary> (AI) 정신 수치입니다. 공포에 대한 저향력을 나타냅니다. </summary>
         public int _mental;
+
+        /// <summary> (AI) 이로운 효과가 있는지 판단하는 기준입니다.  </summary>
+        public bool _beneficial;
 
         public UnitState(int ID)
         {
             this.ID = ID;
-            this._objectType = ObjectType.Unit;
-            this._unitType = UnitType.Human;
+            this._objectType = json[ID]["_objectType"].ToObject<eObjectType>();
+            this._unitType = json[ID]["_unitType"].ToObject<eUnitType>();
+            this._AIType = json[ID]["_AIType"].ToObject<eAIType>();
 
             this._isLive = true;
             this._TeamNumber = 0;
             this._level = 0;
             this._exp = 0;
-            this.maxHP = 10;
+            this.maxHP = json[ID]["maxHP"].ToObject<float>();
             this._HP = this.maxHP;
-            this.maxMP = 10;
+            this.maxMP = json[ID]["maxMP"].ToObject<float>();
             this._MP = this.maxMP;
-            this._price_gold = 0;
-            this._attackRange = 10f;
+            this._price_gold = json[ID]["_price_gold"].ToObject<int>();
+            this._attackRange = json[ID]["_attackRange"].ToObject<float>();
 
-            this._defensivePoint = 0;
-            this._offensivePoint = 0;
+            this._defensivePoint = json[ID]["_defensivePoint"].ToObject<float>();
+            this._offensivePoint = json[ID]["_offensivePoint"].ToObject<float>();
 
-            this._moveSpeed = 10;
+            this._moveSpeed = json[ID]["_moveSpeed"].ToObject<float>();
             this._buffState = new List<Buff>();
 
-            this.defaultPriority = 10;
-            this.defaultCognitiveRange = 8f;
-            this._cognitveRange = 8f;
-            this._currentPriority = 10;
+            this.defaultPriority = json[ID]["defaultPriority"].ToObject<int>();
+            this.defaultCognitiveRange = json[ID]["defaultCognitiveRange"].ToObject<float>();
+            this._cognitveRange = defaultCognitiveRange;
+            this._currentPriority = defaultPriority;
             this._addPriority = 0;
 
-            this._accuracy = 0;
-            this._avoid = 0;
+            this._accuracy = json[ID]["_accuracy"].ToObject<int>();
+            this._avoid = json[ID]["_avoid"].ToObject<int>();
 
-            this._attackType = Data_UnitRelationship.eAttackType.A;
-            this._defendType = Data_UnitRelationship.eDefendType.A;
-            this._property = Data_UnitRelationship.eProperty.A;
+            this._attackType = json[ID]["_attackType"].ToObject<Data_UnitRelationship.eAttackType>();
+            this._defendType = json[ID]["_defendType"].ToObject<Data_UnitRelationship.eDefendType>();
+            this._property = json[ID]["_property"].ToObject<Data_UnitRelationship.eProperty>();
 
-            this._vitaldefend = 0;
-            this._critical = 0;
-            this._criticalrate = 0;
+            this._vitaldefend = json[ID]["_vitaldefend"].ToObject<int>();
+            this._critical = json[ID]["_critical"].ToObject<int>();
+            this._criticalrate = json[ID]["_criticalrate"].ToObject<float>();
             this.criticalHit = false;
 
-            this._protectPoint = 0;
-            this._defaultProtectPoint = 0;
+            this._defaultProtectPoint = json[ID]["_defaultProtectPoint"].ToObject<float>();
+            this._protectPoint = _defaultProtectPoint;
 
-            this._sharp = 0;
+            this._sharp = json[ID]["_sharp"].ToObject<float>();
 
             this._fear = 0;
-            this._mental = 0;
+            this._mental = json[ID]["_mental"].ToObject<int>();
+            this._beneficial = false;
         }
 
         /// <summary>

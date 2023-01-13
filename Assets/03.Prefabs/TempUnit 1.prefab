@@ -59,7 +59,7 @@ GameObject:
   - component: {fileID: 5356843743929178432}
   - component: {fileID: 1535645819682638278}
   m_Layer: 6
-  m_Name: TempUnit
+  m_Name: TempUnit 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 202d872ea280be2469bfe7b9c9c727de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitKind: 0
+  unitKind: 1
   unitState:
     ID: 2
     _objectType: 0

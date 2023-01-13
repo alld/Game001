@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,7 +17,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 캐시처리
     [HideInInspector] public Panel_BasicUnitController unit;
     private CharacterController unitCtrl = null;
-    [HideInInspector] public GameObject _targetObject = null;
     private WaitForSeconds delayTime = null;
     private WaitForSeconds awakeCheekTime = null;
     [HideInInspector] public SphereCollider _cognitiveRange = null;
@@ -27,7 +27,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     [Range(0.5f, 5f)]
     public float _loopSleepDelay = 3.0f;
 
-    public eAIType _type = eAIType.Normal;
     protected List<ActionInfo> _actionList = new List<ActionInfo>();
     [SerializeField]
     public List<ePattern> _scheduler = new List<ePattern>();
@@ -54,7 +53,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// <returns></returns>
     IEnumerator StandbyGameManager()
     {
-        while (GameManager._instance == null) 
+        while (GameManager._instance == null)
         {
             yield return awakeCheekTime;
         }
@@ -74,6 +73,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         public bool ExitEvent;
         public int _targetID;
         public eAction _kind;
+        public ePattern _pattern;
         public GameObject _targetObject;
 
         public void SetExitEvent()
@@ -103,17 +103,52 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         {
             return Quaternion.LookRotation(this._targetObject.transform.position);
         }
+
+        public void SetTargetObject(GameObject target)
+        {
+            this._targetObject = target;
+            this._targetID = target.GetInstanceID();
+        }
+
+        public void SetPatternType(ePattern pattern)
+        {
+            if (this._pattern == pattern) return;
+            this._pattern = pattern;
+
+            switch (pattern)
+            {
+                case ePattern.Continue:
+                    break;
+                case ePattern.Attacking:
+                    break;
+                case ePattern.Avoidng:
+                    break;
+                case ePattern.RunningAway:
+                    break;
+                case ePattern.Flollow:
+                    break;
+                case ePattern.Push:
+                    break;
+                case ePattern.Stern:
+                    break;
+                case ePattern.Skill:
+                    break;
+                case ePattern.Death:
+                    break;
+                case ePattern.Resurrection:
+                    break;
+                case ePattern.Stand:
+                    this._kind = eAction.Idle;
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
     }
     #region 타입 설정
-    public enum eAIType
-    {
-        Normal = 0, // 일반
-        UnArmed,    // 비무장
-        Passive,    // 수동적
-        Active,     // 적극적
-        Aggressive, // 공격적
-        Defensive   // 수비적
-    }
+
 
     public enum ePattern
     {
@@ -150,19 +185,23 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
         unit = GetComponent<Panel_BasicUnitController>();
         _cognitiveRange = GetComponentInChildren<SphereCollider>();
-
+        unitCtrl = GetComponent<CharacterController>();
     }
 
 
     #region 스케쥴러 관리
     public ePattern PatternSearch() // 작성중
     {
-        DataCollection();
+        ActionInfo temp_actionInfo = DataCollection();
+        if (_actionList.Count != 0)
+        {
+            if (temp_actionInfo._kind == _actionList[0]?._kind && temp_actionInfo._targetID == _actionList[0]?._targetID) return temp_actionInfo._pattern;
+        }
 
-        //임시
+        _actionList.Insert(0, new ActionInfo(gameObject));
+        _actionList[0] = temp_actionInfo;
 
-        if (_Info_nearbyEnemy.Count != 0) return ePattern.Attacking;
-        return ePattern.Stand;
+        return _actionList[0]._pattern;
     }
 
     public bool AutoScheduler(ePattern AIPattern, bool rightoff = false)
@@ -252,10 +291,11 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         isSkip = false;
 
-        foreach (var action in _actionList)
+        for (int i = _actionList.Count - 1; i >= 0; i--)
         {
-            if (action.ExitEvent == true) _actionList.Remove(action);
+            if (_actionList[i].ExitEvent == true) _actionList.RemoveAt(i);
         }
+
 
         if (_currentPattern != null)
         {
@@ -294,8 +334,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 패턴
     protected IEnumerator PT_Attacking()
     {
-        _actionList.Insert(0, new ActionInfo(_targetObject));
-
         while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
         {
             Action_Move(_actionList[0]);
@@ -354,8 +392,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// <returns></returns>
     protected IEnumerator PT_Stand()
     {
-        _actionList.Insert(0, new ActionInfo(this.gameObject));
-
         ePattern checkPattern = ePattern.Stand;
         while (checkPattern == ePattern.Stand)
         {
@@ -376,20 +412,69 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// (기능)
     /// <br> AI가 판단하는데 필요한 모든 자료를 셋팅합니다. </br>
     /// </summary>
-    protected void DataCollection()
+    protected ActionInfo DataCollection()
     {
-        _targetObject = null;
+        ActionInfo temp_ActionInfo = new ActionInfo(gameObject);
 
         if (_Info_nearbyUnits.Count == 0) // 주변에 유닛이 없는 경우
         {
-            return;
+            temp_ActionInfo.SetPatternType(ePattern.Stand);
+            return temp_ActionInfo;
         }
-        var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
-        var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
 
-        _targetObject = (temp_Enemy?.unitState._currentPriority < temp_Team?.unitState._currentPriority) ? temp_Team?.gameObject : temp_Enemy?.gameObject;
-        if (_targetObject == null) _targetObject = this.gameObject;
+        switch (unit.unitState._AIType)
+        {
+            case Data_BasicUnitData.eAIType.Normal:
+                var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
+                var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
 
+                if (temp_Enemy == null)
+                {
+                    if (unit.unitState._beneficial == false || temp_Team == null)
+                    {
+                        temp_ActionInfo.SetPatternType(ePattern.Stand);
+                        break;
+                    }
+                    // 추가로 이로운효과 판단 요소가 필요함
+
+                    //임시
+                    temp_ActionInfo.SetTargetObject(temp_Team.gameObject);
+                    // 보유스킬 목록을 찾아서 스킬우선도가 높은걸 먼저 실행함 해당 스킬에서 스킬우선도 변경 조건이잇으면 거기서 반영
+                    temp_ActionInfo.SetPatternType(ePattern.Skill);
+                    break;
+                }
+                else if (temp_Team == null)
+                {
+                    temp_ActionInfo.SetTargetObject(temp_Enemy.gameObject);
+                    temp_ActionInfo.SetPatternType(ePattern.Attacking);
+                    break;
+                }
+
+
+
+                if (temp_Enemy.unitState._currentPriority < temp_Team.unitState._currentPriority)
+                {
+                    temp_ActionInfo.SetTargetObject(temp_Team.gameObject);
+                }
+                else
+                {
+                    temp_ActionInfo.SetTargetObject(temp_Enemy.gameObject);
+                    temp_ActionInfo.SetPatternType(ePattern.Attacking);
+                }
+                break;
+            case Data_BasicUnitData.eAIType.UnArmed:
+                break;
+            case Data_BasicUnitData.eAIType.Passive:
+                break;
+            case Data_BasicUnitData.eAIType.Active:
+                break;
+            case Data_BasicUnitData.eAIType.Aggressive:
+                break;
+            case Data_BasicUnitData.eAIType.Defensive:
+                break;
+        }
+
+        return temp_ActionInfo;
         //_Info_nearbyEnemy[0].unitState._currentPriority = 0;
 
         //List<Panel_BasicUnitController> temp1 = _Info_nearbyEnemy.OrderBy(x => x.unitState._currnetPriority).ToList();
@@ -463,12 +548,18 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         if (action.ExitEvent == true)
         {
-            
+
         }
     }
     #endregion
 
 
+    /// <summary>
+    /// (기능) 
+    /// <br> 외부요인에 의해서 AI패턴이 변경되어야할 상황을 재검토합니다. </br>
+    /// <br> 패턴 대상이 사망하거나, 이동중 새로운 적이 등장, 또는 자신을 공격하는등 우선도가 변경되는 상횡시 호출됩니다.</br>
+    /// </summary>
+    /// <param name="objectID"></param>
     public void OnChangingEvent(int objectID) // 작성중
     {
         foreach (var action in _actionList)

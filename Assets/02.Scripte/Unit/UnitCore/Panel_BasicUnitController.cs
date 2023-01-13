@@ -7,6 +7,14 @@ using static Data_BasicUnitData;
 
 public class Panel_BasicUnitController : MonoBehaviour
 {
+    public enum eUnitKind
+    {
+        A,
+        B,
+        C
+    }
+
+    public eUnitKind unitKind = eUnitKind.A;
     // °í·Á
     public Data_NormalUnit.UnitState unitState;
     private Graphic_BasicUnitAI AI = null;
@@ -14,7 +22,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     private void Start()
     {
         AI = GetComponent<Graphic_BasicUnitAI>();
-        unitState = new Data_NormalUnit.UnitState(gameObject.GetInstanceID());
+        unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
         AIInit();
     }
