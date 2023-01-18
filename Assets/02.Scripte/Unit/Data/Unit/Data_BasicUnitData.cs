@@ -136,6 +136,12 @@ public class Data_BasicUnitData
         /// <summary> (AI) 이로운 효과가 있는지 판단하는 기준입니다.  </summary>
         public bool _beneficial;
 
+        /// <summary> 공격을 반복하는 과정에서 걸리는 시간입니다.  </summary>
+        public float _attackspeed;
+        /// <summary> 원거리 공격 유무(투사체 유무)</summary>
+        public bool _rangeattack;
+
+
         public UnitState(int ID)
         {
             this.ID = ID;
@@ -186,6 +192,9 @@ public class Data_BasicUnitData
             this._fear = 0;
             this._mental = json[ID]["_mental"].ToObject<int>();
             this._beneficial = false;
+
+            this._attackspeed = json[ID]["_attackspeed"].ToObject<float>();
+            this._rangeattack = json[ID]["_rangeattack"].ToObject<bool>();
         }
 
         /// <summary>

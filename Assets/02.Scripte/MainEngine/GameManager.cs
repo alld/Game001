@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public string gameVersion = "0.00";
-    public static bool FinishSetting = false; 
+    public static bool FinishSetting = false;
 
     public enum SceneN
     {

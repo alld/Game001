@@ -19,7 +19,11 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     private CharacterController unitCtrl = null;
     private WaitForSeconds delayTime = null;
     private WaitForSeconds awakeCheekTime = null;
-    [HideInInspector] public SphereCollider _cognitiveRange = null;
+    private WaitForSeconds delayAttackTiming = null;
+    private WaitForSeconds delayAttackEnd = null;
+    
+
+        [HideInInspector] public SphereCollider _cognitiveRange = null;
     #endregion
 
     [Range(0.1f, 2f)]
@@ -51,7 +55,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     /// <br> 에디터에 배치된 유닛들이 게임매니저의 인스턴스 생성과정보다 빠를 경우 이 함수가 실행됩니다. </br>
     /// </summary>
     /// <returns></returns>
-    IEnumerator StandbyGameManager()
+    protected IEnumerator StandbyGameManager()
     {
         while (GameManager._instance == null)
         {
@@ -75,6 +79,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         public eAction _kind;
         public ePattern _pattern;
         public GameObject _targetObject;
+        public Panel_BasicUnitController _unit;
 
         public void SetExitEvent()
         {
@@ -87,6 +92,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             this.ExitEvent = false;
             this._targetID = target.GetInstanceID();
             this._kind = eAction.Idle;
+            this._unit = target.GetComponent<Panel_BasicUnitController>();
         }
 
         public float TargetDistance(Vector3 position)
@@ -182,6 +188,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         delayTime = new WaitForSeconds(_loopCheckDelay);
         awakeCheekTime = new WaitForSeconds(_loopSleepDelay);
+        delayAttackTiming = new WaitForSeconds(unit._animationTime_attackStart);
+        delayAttackEnd = new WaitForSeconds(unit._animationTime_attackEnd);
 
         unit = GetComponent<Panel_BasicUnitController>();
         _cognitiveRange = GetComponentInChildren<SphereCollider>();
@@ -344,11 +352,12 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         // 리소스 관리 효율성을 위해서 해당 함수를 분리시키는 방법을 검토
         // 1안. Attacking 기능의 종료부분을 분리시켜서, 액션에서 반복하고, 종료됬을때 종료부분을 실행시키는 형태.
         // 해당 Action_Attack 내부에서 isSkip 기능 체크 
-        Action_Attack(_actionList[0]);
         while (_actionList[0].ExitEvent == false)
         {
+            yield return delayAttackTiming;
             if (isSkip == true) break;
-            yield return delayTime;
+            Action_Attack(_actionList[0]);
+            yield return delayAttackEnd;
         }
         _actionList[0].SetExitEvent();
         ActionEnd();
@@ -548,8 +557,9 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         if (action.ExitEvent == true)
         {
-
+            return;
         }
+        if (_actionList[0]._unit.EventDamage(unit)) _actionList[0].SetExitEvent(); // 어디까지 대응을 해줘야할지 검토가 필요함 1. 사망처리(자동 호출로 통일 가능함), AI타겟변동, 행동종료
     }
     #endregion
 

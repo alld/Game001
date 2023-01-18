@@ -14,6 +14,15 @@ public class Panel_BasicUnitController : MonoBehaviour
         C
     }
 
+    /// <summary> (prefab) 투사체 프리팹입니다. </summary>
+    public GameObject _projectile;
+    /// <summary> (prefab) 피격효과 프리팹입니다. </summary>
+    public GameObject _attackedEffect;
+
+    public float _animationTime_attackStart = 1f;
+    public float _animationTime_attackEnd = 1f;
+    public float _animationTime_attacked = 1f;
+
     public eUnitKind unitKind = eUnitKind.A;
     // 고려
     public Data_NormalUnit.UnitState unitState;
@@ -42,6 +51,18 @@ public class Panel_BasicUnitController : MonoBehaviour
         return check;
     }
 
+
+    IEnumerator OnEffectAttacked()
+    {
+        
+        yield break;
+    }
+
+    IEnumerator OnEffectProjectile()
+    {
+        yield return new WaitForSeconds(_animationTime_attackStart);
+        yield break;
+    }
 
 
     protected void AIInit()
