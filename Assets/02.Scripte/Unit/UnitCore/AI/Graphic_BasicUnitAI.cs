@@ -19,8 +19,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     private CharacterController unitCtrl = null;
     private WaitForSeconds delayTime = null;
     private WaitForSeconds awakeCheekTime = null;
-    private WaitForSeconds delayAttackTiming = null;
-    private WaitForSeconds delayAttackEnd = null;
+    public WaitForSeconds delayAttackTiming = null;
+    public WaitForSeconds delayAttackEnd = null;
     
 
         [HideInInspector] public SphereCollider _cognitiveRange = null;
@@ -46,6 +46,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         if (GameManager._instance != null)
         {
             GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
+            AutoScheduler(ePattern.Continue);
         }
         else StartCoroutine(StandbyGameManager());
     }
@@ -114,6 +115,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         {
             this._targetObject = target;
             this._targetID = target.GetInstanceID();
+            this._unit = target.GetComponent<Panel_BasicUnitController>();
         }
 
         public void SetPatternType(ePattern pattern)
@@ -188,8 +190,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         delayTime = new WaitForSeconds(_loopCheckDelay);
         awakeCheekTime = new WaitForSeconds(_loopSleepDelay);
-        delayAttackTiming = new WaitForSeconds(unit._animationTime_attackStart);
-        delayAttackEnd = new WaitForSeconds(unit._animationTime_attackEnd);
 
         unit = GetComponent<Panel_BasicUnitController>();
         _cognitiveRange = GetComponentInChildren<SphereCollider>();
@@ -206,10 +206,10 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             if (temp_actionInfo._kind == _actionList[0]?._kind && temp_actionInfo._targetID == _actionList[0]?._targetID) return temp_actionInfo._pattern;
         }
 
-        _actionList.Insert(0, new ActionInfo(gameObject));
-        _actionList[0] = temp_actionInfo;
+        _actionList.Add(temp_actionInfo);
 
-        return _actionList[0]._pattern;
+        
+        return _actionList.Last()._pattern;
     }
 
     public bool AutoScheduler(ePattern AIPattern, bool rightoff = false)
@@ -301,7 +301,13 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
         for (int i = _actionList.Count - 1; i >= 0; i--)
         {
-            if (_actionList[i].ExitEvent == true) _actionList.RemoveAt(i);
+            if (_actionList[i].ExitEvent == true)
+            {
+                _Info_nearbyUnits.Remove(_actionList[i]._unit);
+                _Info_nearbyTeam.Remove(_actionList[i]._unit);
+                _Info_nearbyEnemy.Remove(_actionList[i]._unit);
+                _actionList.RemoveAt(i);
+            }
         }
 
 
@@ -345,17 +351,17 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
         {
             Action_Move(_actionList[0]);
-            if (isSkip == true) break;
+            if (isSkip == true || _actionList[0].ExitEvent == true) break;
             yield return delayTime;
         }
 
         // 리소스 관리 효율성을 위해서 해당 함수를 분리시키는 방법을 검토
         // 1안. Attacking 기능의 종료부분을 분리시켜서, 액션에서 반복하고, 종료됬을때 종료부분을 실행시키는 형태.
         // 해당 Action_Attack 내부에서 isSkip 기능 체크 
-        while (_actionList[0].ExitEvent == false)
+        while (_actionList[0].TargetDistance(gameObject.transform.position) <= unit.unitState._attackRange)
         {
             yield return delayAttackTiming;
-            if (isSkip == true) break;
+            if (isSkip == true || _actionList[0].ExitEvent == true) break;
             Action_Attack(_actionList[0]);
             yield return delayAttackEnd;
         }
@@ -424,7 +430,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     protected ActionInfo DataCollection()
     {
         ActionInfo temp_ActionInfo = new ActionInfo(gameObject);
-
         if (_Info_nearbyUnits.Count == 0) // 주변에 유닛이 없는 경우
         {
             temp_ActionInfo.SetPatternType(ePattern.Stand);
@@ -509,6 +514,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.AIMissingComponent);
             return;
         }
+        if (tempVar_Unit.unitState._isLive == false) return;
+
         _Info_nearbyUnits.Add(tempVar_Unit);
         if (GameManager._instance._teamSetting.GetTeamStatus(unit.unitState._TeamNumber, tempVar_Unit.unitState._TeamNumber) == true)
         {
@@ -530,6 +537,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.AIMissingComponent);
             return;
         }
+        if (tempVar_Unit.unitState._isLive == false) return;
 
         _Info_nearbyUnits.Remove(tempVar_Unit);
         _Info_nearbyTeam.Remove(tempVar_Unit);
@@ -559,7 +567,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         {
             return;
         }
-        if (_actionList[0]._unit.EventDamage(unit)) _actionList[0].SetExitEvent(); // 어디까지 대응을 해줘야할지 검토가 필요함 1. 사망처리(자동 호출로 통일 가능함), AI타겟변동, 행동종료
+        if (_actionList[0]._unit.EventDamage(unit) == false) _actionList[0].SetExitEvent(); // 어디까지 대응을 해줘야할지 검토가 필요함 1. 사망처리(자동 호출로 통일 가능함), AI타겟변동, 행동종료
     }
     #endregion
 
@@ -577,7 +585,6 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             if (action._targetID == objectID)
             {
                 action.SetExitEvent();
-                ActionEnd();
             }
         }
     }

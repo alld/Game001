@@ -40,14 +40,14 @@ public class Panel_BasicUnitController : MonoBehaviour
     public bool EventDamage(Panel_BasicUnitController opponent)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState);
-        GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
+        if(check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
         return check;
     }
 
     public bool EventDamage(Panel_BasicUnitController opponent, bool IgnoreDefend, bool IgnoreProtect)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState, IgnoreDefend, IgnoreProtect);
-        GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
+        if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
         return check;
     }
 
@@ -75,5 +75,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     protected void UpdateAIVariable()
     {
         AI._cognitiveRange.radius = unitState._cognitveRange;
+        AI.delayAttackTiming = new WaitForSeconds(_animationTime_attackStart);
+        AI.delayAttackEnd = new WaitForSeconds(_animationTime_attackEnd);
     }
 }

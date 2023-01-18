@@ -208,9 +208,9 @@ public class Data_BasicUnitData
         /// <returns>유닛의 생존유무를 반환합니다.</returns>
         public bool Damage(float damage, bool isDeadly = true)
         {
-            if (damage > 0) return Heal(damage);
+            if (damage < 0) return Heal(damage);
             this._HP -= damage;
-            if (this._HP >= 0)
+            if (this._HP <= 0)
             {
                 if (isDeadly == false)
                 {
@@ -243,6 +243,7 @@ public class Data_BasicUnitData
             if (Death_Moment() == true) return this._isLive;
 
             this._isLive = false;
+            this._currentPriority = 0;
 
             if (Death_after() == true) return this._isLive;
             return this._isLive;
