@@ -1,16 +1,11 @@
-using Codice.Client.BaseCommands;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 [System.Serializable]
-public class Graphic_BasicUnitAI : MonoBehaviour
+public class Panel_BasicUnitAI : MonoBehaviour
 {
     private const string tag_Trigger = "Trigger";
 
@@ -42,36 +37,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     protected List<Panel_BasicUnitController> _Info_nearbyTeam = new List<Panel_BasicUnitController>();
     protected List<Panel_BasicUnitController> _Info_nearbyEnemy = new List<Panel_BasicUnitController>();
 
-    private void OnEnable()
-    {
-        if (GameManager._instance != null)
-        {
-            GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
-            AutoScheduler(ePattern.Continue);
-        }
-        else StartCoroutine(StandbyGameManager());
-    }
 
-    /// <summary>
-    /// (예외대응) 
-    /// <br> 에디터에 배치된 유닛들이 게임매니저의 인스턴스 생성과정보다 빠를 경우 이 함수가 실행됩니다. </br>
-    /// </summary>
-    /// <returns></returns>
-    protected IEnumerator StandbyGameManager()
-    {
-        while (GameManager._instance == null)
-        {
-            yield return awakeCheekTime;
-        }
-        GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.DelegateSettingError);
-        GameManager._instance._unitManager.OnStateChangeUnit += OnChangingEvent;
-        AutoScheduler(ePattern.Continue);
-    }
-
-    private void OnDisable()
-    {
-        GameManager._instance._unitManager.OnStateChangeUnit -= OnChangingEvent;
-    }
 
 
     public class ActionInfo
@@ -586,6 +552,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
         {
             unitCtrl.Move(_actionList[0].TargetMovePointVec3(gameObject.transform.position, unit.unitState._moveSpeed));
+            HPBarMove();
             if (isSkip == true || _actionList[0].ExitEvent == true) break;
             yield return temp_deltaTime;
         }
@@ -609,6 +576,12 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         _currentAction = null;
     }
     #endregion
+
+    private static Vector3 HpbarHeight = new Vector3(0, 2f, 0);
+    public void HPBarMove()
+    {
+        unit._HPbar._bar.transform.position = Camera.main.WorldToScreenPoint(transform.position + HpbarHeight);
+    }
 
 
     /// <summary>

@@ -3,7 +3,9 @@ guid: 34890126446f1c2488d07fa107608a11
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - prefab_HPBar: {fileID: 3166851338439858107, guid: 5207428a7e9d3b3439e18c0bfdfe013f, type: 3}
+  - canvas: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

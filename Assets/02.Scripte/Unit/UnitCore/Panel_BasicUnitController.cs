@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using UnityEditor;
 using UnityEngine;
-using static Data_BasicUnitData;
+using UnitGaugeSample;
+using static Panel_BasicUnitAI;
 
 public class Panel_BasicUnitController : MonoBehaviour
 {
@@ -26,21 +25,73 @@ public class Panel_BasicUnitController : MonoBehaviour
     public eUnitKind unitKind = eUnitKind.A;
     // 고려
     public Data_NormalUnit.UnitState unitState;
-    private Graphic_BasicUnitAI AI = null;
+    private Panel_BasicUnitAI AI = null;
 
-    private void Start()
+    public UnitGauge _HPbar = null;
+
+    private void Awake()
     {
-        AI = GetComponent<Graphic_BasicUnitAI>();
+        AI = GetComponent<Panel_BasicUnitAI>();
         unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
         AIInit();
+
+        InitHPbar();
     }
+
+    private void InitHPbar()
+    {
+        if (_HPbar == null) _HPbar = GameManager._instance._unitManager.PoolSetUnitGauge();
+
+
+        Debug.Log("1." + _HPbar);
+        Debug.Log("2." + GameManager._instance._unitManager._poolHPbar.Count);
+        Debug.Log("3." + _HPbar);
+        Debug.Log("4." + _HPbar);
+        //_HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
+
+        //AI.HPBarMove();
+    }
+
+    private void OnEnable()
+    {
+        if (GameManager._instance != null)
+        {
+            GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
+            AI.AutoScheduler(ePattern.Continue);
+        }
+        else StartCoroutine(StandbyGameManager());
+    }
+
+    /// <summary>
+    /// (예외대응) 
+    /// <br> 에디터에 배치된 유닛들이 게임매니저의 인스턴스 생성과정보다 빠를 경우 이 함수가 실행됩니다. </br>
+    /// </summary>
+    /// <returns></returns>
+    protected IEnumerator StandbyGameManager()
+    {
+        while (GameManager._instance == null)
+        {
+            yield return new WaitForSeconds(2.0f);
+        }
+        GameManager._instance._logManager.InputErrorLog(EnumError.ErrorKind.DelegateSettingError);
+        GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
+        AI.AutoScheduler(ePattern.Continue);
+    }
+
+    private void OnDisable()
+    {
+        GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
+    }
+
+
 
 
     public bool EventDamage(Panel_BasicUnitController opponent)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState);
         if(check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
+        _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
         return check;
     }
 
@@ -48,6 +99,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     {
         bool check = unitState.CalculatorDamage(opponent.unitState, IgnoreDefend, IgnoreProtect);
         if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
+        _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
         return check;
     }
 
