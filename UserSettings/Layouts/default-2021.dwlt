@@ -74,7 +74,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 65
+  controlID: 83
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -151,7 +151,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 200}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 87
+  controlID: 59
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 17
+  controlID: 60
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -295,8 +295,8 @@ MonoBehaviour:
     y: 0
     width: 907
     height: 491
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 221}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 19}
   m_Panes:
   - {fileID: 19}
@@ -389,7 +389,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: f6b6fffff8b6ffff80b9ffff82b9ffff40bbffff1ebdffff20bdffffa0bfffffa2bfffff3ac2ffffa6c2ffffa8c2ffff76c4ffff78c4ffff44c7ffffa2c9ffffb4cbffffb6cbffff8ccdffff8ecdffff4ccfffff4ecfffffccd1ffffced1ffff4ed4ffff50d4ffffd0d6ffffd2d6ffff80d9ffff82d9ffff22dcffff24dcffff82deffff08e1ffff74e1ffff76e1ffff56e5ffff58e5ffff90e7ffff92e7ffff54e8fffff0ebffffc0ecffff20edfffff4edffffc8f0ffffd6f2ffffd8f2ffff80f5ffffeef5ffff50f8ffff2efbffff705f00002a6000000c660000c66600001a700000
+      m_ExpandedIDs: 2efbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -540,18 +540,18 @@ MonoBehaviour:
     m_ExpandedIDs: ffffffff000000007c5d00007e5d0000805d0000825d0000845d0000865d0000885d00008a5d00008c5d00008e5d0000905d0000925d0000945d0000965d0000985d00009a5d00009c5d00009e5d0000a05d0000a25d0000a45d0000a65d0000a85d0000aa5d0000ac5d0000ae5d0000b05d0000b25d0000b45d0000b65d0000b85d0000ba5d0000bc5d0000be5d0000c05d0000c25d0000c45d0000c65d0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 01.Main
-      m_OriginalName: 01.Main
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 24102
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 10}
     m_SearchString: 
@@ -961,7 +961,7 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: -0.24521899, y: 0.62802666, z: -0.21875861, w: -0.70551956}
     speed: 2
-    m_Value: {x: -0.245199, y: 0.62797546, z: -0.21874078, w: -0.70546204}
+    m_Value: {x: -0.24521898, y: 0.62802666, z: -0.2187586, w: -0.7055195}
   m_Size:
     m_Target: 3.5460267
     speed: 2

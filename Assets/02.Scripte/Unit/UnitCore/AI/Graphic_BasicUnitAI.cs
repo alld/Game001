@@ -21,9 +21,9 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     private WaitForSeconds awakeCheekTime = null;
     public WaitForSeconds delayAttackTiming = null;
     public WaitForSeconds delayAttackEnd = null;
-    
 
-        [HideInInspector] public SphereCollider _cognitiveRange = null;
+
+    [HideInInspector] public SphereCollider _cognitiveRange = null;
     #endregion
 
     [Range(0.1f, 2f)]
@@ -34,7 +34,8 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     protected List<ActionInfo> _actionList = new List<ActionInfo>();
     [SerializeField]
     public List<ePattern> _scheduler = new List<ePattern>();
-    protected IEnumerator _currentPattern = null;
+    protected Coroutine _currentPattern = null;
+    protected Coroutine _currentAction = null;
     protected bool isSkip = false;
 
     protected List<Panel_BasicUnitController> _Info_nearbyUnits = new List<Panel_BasicUnitController>();
@@ -104,6 +105,11 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         public Vector3 TargetDirectionVec3(Vector3 position)
         {
             return this._targetObject.transform.position - position;
+        }
+
+        public Vector3 TargetMovePointVec3(Vector3 position, float moveSpeed)
+        {
+            return Vector3.Normalize(TargetDirectionVec3(position)) * moveSpeed * Time.deltaTime;
         }
 
         public Quaternion TargetDirectionQuat()
@@ -208,7 +214,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
 
         _actionList.Add(temp_actionInfo);
 
-        
+
         return _actionList.Last()._pattern;
     }
 
@@ -217,8 +223,7 @@ public class Graphic_BasicUnitAI : MonoBehaviour
         if (ePattern.Death == AIPattern) // 사망처리는 어떤것보다 우선처리되어야해서 별도 제어됩니다. 
         {
             ImmediateInterruption();
-            _currentPattern = PT_Death();
-            StartCoroutine(_currentPattern);
+            _currentPattern = StartCoroutine(PT_Death());
             return false;
         }
         else if (ePattern.Continue == AIPattern)
@@ -227,40 +232,31 @@ public class Graphic_BasicUnitAI : MonoBehaviour
             switch (_scheduler[0])
             {
                 case ePattern.Attacking:
-                    _currentPattern = PT_Attacking();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Attacking());
                     break;
                 case ePattern.Avoidng:
-                    _currentPattern = PT_Avoidng();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Avoidng());
                     break;
                 case ePattern.RunningAway:
-                    _currentPattern = PT_RunningAway();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_RunningAway());
                     break;
                 case ePattern.Flollow:
-                    _currentPattern = PT_Flollow();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Flollow());
                     break;
                 case ePattern.Push:
-                    _currentPattern = PT_Push();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Push());
                     break;
                 case ePattern.Stern:
-                    _currentPattern = PT_Stern();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Stern());
                     break;
                 case ePattern.Skill:
-                    _currentPattern = PT_Skill();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Skill());
                     break;
                 case ePattern.Resurrection:
-                    _currentPattern = PT_Resurrection();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Resurrection());
                     break;
                 case ePattern.Stand:
-                    _currentPattern = PT_Stand();
-                    StartCoroutine(_currentPattern);
+                    _currentPattern = StartCoroutine(PT_Stand());
                     break;
                 default:
                     return AutoScheduler(PatternSearch());
@@ -299,6 +295,22 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     {
         isSkip = false;
 
+        RemoveActionList();
+
+        CoroutineArrange();
+
+        if (_scheduler.Count != 0)
+        {
+            _scheduler.RemoveAt(0);
+            AutoScheduler(ePattern.Continue);
+        }
+    }
+
+    /// <summary>
+    /// (기능) 액션 리스트에 제거되야 할 값을 찾아 지웁니다.
+    /// </summary>
+    private void RemoveActionList()
+    {
         for (int i = _actionList.Count - 1; i >= 0; i--)
         {
             if (_actionList[i].ExitEvent == true)
@@ -309,19 +321,23 @@ public class Graphic_BasicUnitAI : MonoBehaviour
                 _actionList.RemoveAt(i);
             }
         }
+    }
 
-
+    /// <summary>
+    /// (기능) 현재 진행중인 잔여 코루틴들을 정리합니다. 
+    /// </summary>
+    private void CoroutineArrange()
+    {
         if (_currentPattern != null)
         {
             StopCoroutine(_currentPattern);
             _currentPattern = null;
         }
 
-
-        if (_scheduler.Count != 0)
+        if (_currentAction != null)
         {
-            _scheduler.RemoveAt(0);
-            AutoScheduler(ePattern.Continue);
+            StopCoroutine(_currentAction);
+            _currentAction = null;
         }
     }
 
@@ -348,23 +364,35 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #region 패턴
     protected IEnumerator PT_Attacking()
     {
-        while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
+        do
         {
-            Action_Move(_actionList[0]);
-            if (isSkip == true || _actionList[0].ExitEvent == true) break;
+            if (isSkip == true || _actionList[0].ExitEvent == true)
+            {
+                StopCoroutine(_currentAction);
+                _currentAction = null;
+                break;
+            }
+            if (_currentAction == null) _currentAction = StartCoroutine(Action_Move());
             yield return delayTime;
         }
+        while (_currentAction != null);
 
         // 리소스 관리 효율성을 위해서 해당 함수를 분리시키는 방법을 검토
         // 1안. Attacking 기능의 종료부분을 분리시켜서, 액션에서 반복하고, 종료됬을때 종료부분을 실행시키는 형태.
         // 해당 Action_Attack 내부에서 isSkip 기능 체크 
-        while (_actionList[0].TargetDistance(gameObject.transform.position) <= unit.unitState._attackRange)
+        do
         {
+            if (isSkip == true || _actionList[0].ExitEvent == true)
+            {
+                StopCoroutine(_currentAction);
+                _currentAction = null;
+                break;
+            }
+            if (_currentAction == null) _currentAction = StartCoroutine(Action_Attack());
             yield return delayAttackTiming;
-            if (isSkip == true || _actionList[0].ExitEvent == true) break;
-            Action_Attack(_actionList[0]);
             yield return delayAttackEnd;
         }
+        while (_currentAction != null);
         _actionList[0].SetExitEvent();
         ActionEnd();
     }
@@ -551,23 +579,34 @@ public class Graphic_BasicUnitAI : MonoBehaviour
     #endregion
 
     #region 유닛 동작
-    protected void Action_Move(ActionInfo action) // 작성중
+
+    protected IEnumerator Action_Move() // 작성중
     {
-        if (action.ExitEvent == true)
+        WaitForSeconds temp_deltaTime = new WaitForSeconds(Time.deltaTime);
+        while (_actionList[0].TargetDistance(gameObject.transform.position) > unit.unitState._attackRange)
         {
-            AutoScheduler(ePattern.Continue);
-            return;
+            unitCtrl.Move(_actionList[0].TargetMovePointVec3(gameObject.transform.position, unit.unitState._moveSpeed));
+            if (isSkip == true || _actionList[0].ExitEvent == true) break;
+            yield return temp_deltaTime;
         }
-        unitCtrl.Move(action.TargetDirectionVec3(gameObject.transform.position));
+        _currentAction = null;
     }
 
-    protected void Action_Attack(ActionInfo action) // 작성중
+
+    protected IEnumerator Action_Attack() // 작성중
     {
-        if (action.ExitEvent == true)
+        while (_actionList[0].TargetDistance(gameObject.transform.position) <= unit.unitState._attackRange)
         {
-            return;
+            yield return delayAttackTiming;
+            if (isSkip == true || _actionList[0].ExitEvent == true) break;
+            if (_actionList[0]._unit.EventDamage(unit) == false)
+            {
+                _actionList[0].SetExitEvent(); // 어디까지 대응을 해줘야할지 검토가 필요함 1. 사망처리(자동 호출로 통일 가능함), AI타겟변동, 행동종료
+                break;
+            }
+            yield return delayAttackEnd;
         }
-        if (_actionList[0]._unit.EventDamage(unit) == false) _actionList[0].SetExitEvent(); // 어디까지 대응을 해줘야할지 검토가 필요함 1. 사망처리(자동 호출로 통일 가능함), AI타겟변동, 행동종료
+        _currentAction = null;
     }
     #endregion
 
