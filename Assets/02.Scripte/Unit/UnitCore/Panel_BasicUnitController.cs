@@ -36,21 +36,18 @@ public class Panel_BasicUnitController : MonoBehaviour
 
         AIInit();
 
-        InitHPbar();
+        StartCoroutine(InitHPbar());
     }
 
-    private void InitHPbar()
+    private IEnumerator InitHPbar()
     {
-        if (_HPbar == null) _HPbar = GameManager._instance._unitManager.PoolSetUnitGauge();
+        yield return null;
 
+        _HPbar = GameManager._instance._unitManager.PoolSetUnitGauge();
 
-        Debug.Log("1." + _HPbar);
-        Debug.Log("2." + GameManager._instance._unitManager._poolHPbar.Count);
-        Debug.Log("3." + _HPbar);
-        Debug.Log("4." + _HPbar);
-        //_HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
+        _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
 
-        //AI.HPBarMove();
+        AI.HPBarMove();
     }
 
     private void OnEnable()

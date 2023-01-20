@@ -43,7 +43,7 @@ public class Global_UnitManager : MonoBehaviour
         temp_number = _poolHPBar_count[0];
         _poolHPBar_count.RemoveAt(0);
         _poolHPbar[temp_number]._isAssign = true;
-        
+
 
         return _poolHPbar[temp_number];
     }
