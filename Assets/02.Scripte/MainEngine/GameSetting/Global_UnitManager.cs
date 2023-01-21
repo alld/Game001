@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class Global_UnitManager : MonoBehaviour
 {
+    [Header("오브젝트 풀")]
     public GameObject prefab_HPBar;
     public GameObject canvas;
 
@@ -16,7 +17,7 @@ public class Global_UnitManager : MonoBehaviour
     {
         canvas = GameObject.Find("HPbarGroup");
 
-        //PoolAddUnitGauge();
+        PoolAddUnitGauge();
 
         OnStateChangeUnit = null;
     }
@@ -27,7 +28,7 @@ public class Global_UnitManager : MonoBehaviour
     }
 
     public List<UnitPool> _poolUnit = new List<UnitPool>();
-    //[HideInInspector]
+    [HideInInspector]
     public List<UnitGauge> _poolHPbar = new List<UnitGauge>();
     public List<int> _poolHPBar_count = new List<int>();
     private const int AddNumber = 5;

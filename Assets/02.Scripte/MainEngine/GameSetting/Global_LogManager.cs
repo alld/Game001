@@ -19,17 +19,19 @@ namespace EnumError
 
 public class Global_LogManager : MonoBehaviour
 {
-    [SerializeField]
-    private bool putLog = false;
-    [SerializeField]
-    private List<string> log = new List<string>();
 
     private StringBuilder SB = new StringBuilder();
 
+    [Header("파일 저장")]
     public string dataPath = "";
     public bool _record = true;
     public bool _overwrite = false;
 
+    [Header("로그 관리")]
+    [SerializeField]
+    private bool putLog = false;
+    [SerializeField]
+    private List<string> log = new List<string>();
 
     /// <summary>
     /// (기능) 
@@ -82,6 +84,9 @@ public class Global_LogManager : MonoBehaviour
         {
             fileStream = new FileStream(dataPath, FileMode.Append, FileAccess.Write);
             StreamWriter writer = new StreamWriter(fileStream);
+            writer.WriteLineAsync("--------------");
+            writer.WriteLineAsync("해당 로그 수집은 이슈수정에 도움이됩니다. ");
+            writer.WriteLineAsync("--------------");
             writer.WriteLineAsync(log[log.Count - 1]);
             writer.Close();
         }
@@ -89,6 +94,9 @@ public class Global_LogManager : MonoBehaviour
         {
             fileStream = new FileStream(dataPath, FileMode.Create, FileAccess.Write);
             StreamWriter writer = new StreamWriter(fileStream);
+            writer.WriteLineAsync("--------------");
+            writer.WriteLineAsync("해당 로그 수집은 이슈수정에 도움이됩니다. ");
+            writer.WriteLineAsync("--------------");
             foreach (var text in log)
             {
                 writer.WriteLineAsync(text);

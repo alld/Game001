@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     public Global_LogManager _logManager = null;
     public Global_UnitManager _unitManager = null;
     public Global_MapManager _mapManager = null;
+    public Global_GameSetting _gameSetting = null;
 
 
     private void Awake()
@@ -47,6 +48,9 @@ public class GameManager : MonoBehaviour
     private void GameInit()
     {
         _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt"; // 로그매니저의 텍스트파일 저장경로를 지정합니다. 
+        _gameSetting.dataPath = Application.persistentDataPath + "/GameSetting.txt"; // 환경설정의 텍스트파일 저장경로를 지정합니다. 
+
+        _gameSetting.Init(); 
 
         _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
