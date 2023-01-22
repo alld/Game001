@@ -259,6 +259,8 @@ public class Global_GameSetting : MonoBehaviour
                 break;
         }
         Screen.SetResolution(GS_width, GS_height, !_GS_Window);
+
+        Global_TextManager.SetLangauge(_GS_Language);
     }
 
     public void onClickTest()

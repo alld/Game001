@@ -82,9 +82,12 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     private void OnDisable()
     {
-        _HPbar._isActive = false;
 
-        GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
+        if (GameManager._instance._unitManager != null)
+        {
+            if (_HPbar != null)_HPbar._isActive = false;
+            GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
+        }
     }
 
 

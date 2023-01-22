@@ -26,6 +26,8 @@ public class GameManager : MonoBehaviour
     public Global_UnitManager _unitManager = null;
     public Global_MapManager _mapManager = null;
     public Global_GameSetting _gameSetting = null;
+    public Global_TextManager _textManager = null;
+
 
 
     private void Awake()

@@ -1,5 +1,49 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &910155706672734915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6607937426221985425}
+  - component: {fileID: 6710242528502293111}
+  m_Layer: 0
+  m_Name: TextManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6607937426221985425
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910155706672734915}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1904746496601863005}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6710242528502293111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910155706672734915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f9d1a69385453747bc003cd00c02380, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1904746495324066717
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,6 +184,7 @@ Transform:
   - {fileID: 3288491228259237362}
   - {fileID: 1688695869608274224}
   - {fileID: 1624109095411052808}
+  - {fileID: 6607937426221985425}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -155,12 +200,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.16
+  gameVersion: 0.17
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
   _mapManager: {fileID: 2138154083336503566}
   _gameSetting: {fileID: 8233259764772136063}
+  _textManager: {fileID: 6710242528502293111}
 --- !u!1 &1953529289373026573
 GameObject:
   m_ObjectHideFlags: 0
