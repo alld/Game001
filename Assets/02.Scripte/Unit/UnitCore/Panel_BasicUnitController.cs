@@ -47,6 +47,8 @@ public class Panel_BasicUnitController : MonoBehaviour
 
         _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
 
+        _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
+
         AI.HPBarMove();
     }
 
@@ -56,6 +58,8 @@ public class Panel_BasicUnitController : MonoBehaviour
         {
             GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
             AI.AutoScheduler(ePattern.Continue);
+
+            if(_HPbar._bar != null)_HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
         }
         else StartCoroutine(StandbyGameManager());
     }
@@ -78,6 +82,8 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     private void OnDisable()
     {
+        _HPbar._isActive = false;
+
         GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
     }
 

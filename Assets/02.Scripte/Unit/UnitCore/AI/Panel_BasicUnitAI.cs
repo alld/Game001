@@ -14,6 +14,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     private CharacterController unitCtrl = null;
     private WaitForSeconds delayTime = null;
     private WaitForSeconds awakeCheekTime = null;
+    private WaitForSeconds rotdelayTime = null;
     public WaitForSeconds delayAttackTiming = null;
     public WaitForSeconds delayAttackEnd = null;
 
@@ -25,6 +26,8 @@ public class Panel_BasicUnitAI : MonoBehaviour
     public float _loopCheckDelay = 0.1f;
     [Range(0.5f, 5f)]
     public float _loopSleepDelay = 3.0f;
+    [Range(1f, 30f)]
+    public float _loopRotDelay = 5.0f;
 
     protected List<ActionInfo> _actionList = new List<ActionInfo>();
     [SerializeField]
@@ -142,7 +145,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
         Skill,
         Death,
         Resurrection,
-        Stand
+        Stand,
     }
 
     public enum eAction
@@ -162,6 +165,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     {
         delayTime = new WaitForSeconds(_loopCheckDelay);
         awakeCheekTime = new WaitForSeconds(_loopSleepDelay);
+        rotdelayTime = new WaitForSeconds(_loopRotDelay);
 
         unit = GetComponent<Panel_BasicUnitController>();
         _cognitiveRange = GetComponentInChildren<SphereCollider>();
@@ -249,6 +253,30 @@ public class Panel_BasicUnitAI : MonoBehaviour
             return true;
         }
     }
+
+    /// <summary>
+    /// (기능) 스케쥴러를 종료시키는 함수입니다. 부수처리는 외부함수에서 처리됩니다.
+    /// </summary>
+    public void ShutdownScheduler()
+    {
+        _actionList.Clear();
+
+        isSkip = true;
+    }
+
+    /// <summary>
+    /// (기능) 스케쥴러를 종료시키는 함수입니다. 매개변수가 담길경우 모든 처리를 해당함수에서 담당합니다. 
+    /// </summary>
+    /// <param name="check"></param>
+    public void ShutdownScheduler(bool check)
+    {
+        isSkip = true;
+
+        _actionList.Clear();
+
+        CoroutineArrange();
+    }
+
 
     /// <summary>
     /// (기능)
@@ -388,7 +416,16 @@ public class Panel_BasicUnitAI : MonoBehaviour
     }
     protected IEnumerator PT_Death()
     {
-        yield return null;
+        unit.unitState.Death();
+
+        if (unit.unitState._isRotting == true) yield return rotdelayTime;
+        else yield return new WaitForSeconds(1f); // 애니메이션 타임
+        ShutdownScheduler();
+
+        // <- (추가) 유닛매니저 풀링에서 해당 유닛 해제 및 연결되어잇는 내용물 제거
+        // 풀링에서 제거될시 해당 유닛을 디시블이나 오브젝터 처리
+
+        CoroutineArrange();
     }
     protected IEnumerator PT_Resurrection()
     {
@@ -423,7 +460,19 @@ public class Panel_BasicUnitAI : MonoBehaviour
     /// </summary>
     protected ActionInfo DataCollection()
     {
+
         ActionInfo temp_ActionInfo = new ActionInfo(gameObject);
+        if(unit.unitState._isLive == false)
+        {
+            temp_ActionInfo.SetPatternType(ePattern.Death);
+            return temp_ActionInfo;
+        } else if (_actionList.Count != 0)
+        {
+            if (_actionList[0]._pattern == ePattern.Death && unit.unitState._isLive == true)
+            {
+                // 부활 로직 실행 // 여기서 할지 외부에서 이벤트식으로 부활시 스케쥴러로 처리할지 고민..
+            }
+        }
         if (_Info_nearbyUnits.Count == 0) // 주변에 유닛이 없는 경우
         {
             temp_ActionInfo.SetPatternType(ePattern.Stand);
@@ -577,7 +626,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     }
     #endregion
 
-    private static Vector3 HpbarHeight = new Vector3(0, 2f, 0);
+    private static Vector3 HpbarHeight = new Vector3(0, 1.5f, 0);
     public void HPBarMove()
     {
         unit._HPbar._bar.transform.position = Camera.main.WorldToScreenPoint(transform.position + HpbarHeight);

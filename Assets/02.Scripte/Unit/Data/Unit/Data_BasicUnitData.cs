@@ -15,7 +15,7 @@ public class Data_BasicUnitData
     public static int standardDeviation = 3;
     protected static TextAsset jsonData = Resources.Load<TextAsset>("SettingData/Unit/UnitDataTable");
     protected static JArray json = JArray.Parse(jsonData.text);
-
+    
     public enum eAIType
     {
         Normal = 0, // 일반
@@ -141,7 +141,8 @@ public class Data_BasicUnitData
         /// <summary> 원거리 공격 유무(투사체 유무)</summary>
         public bool _rangeattack;
 
-
+        /// <summary> 시체가 썩는 유무를 결정합니다. 해당 유닛이 썩을 경우 부활이나 시체활용이 가능한 객체입니다. </summary>
+        public bool _isRotting; 
         public UnitState(int ID)
         {
             this.ID = ID;
@@ -195,6 +196,8 @@ public class Data_BasicUnitData
 
             this._attackspeed = json[ID]["_attackspeed"].ToObject<float>();
             this._rangeattack = json[ID]["_rangeattack"].ToObject<bool>();
+
+            this._isRotting = true;
         }
 
         /// <summary>

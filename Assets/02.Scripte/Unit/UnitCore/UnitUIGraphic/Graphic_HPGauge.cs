@@ -13,6 +13,7 @@ public class Graphic_HPGauge : MonoBehaviour
         GameManager._instance._unitManager._poolHPbar.Add(_unitGauge);
         GameManager._instance._unitManager._poolHPBar_count.Add(GameManager._instance._unitManager._poolHPbar.Count - 1);
 
-        //GameManager._instance._gameSetting.
+        _unitGauge._isActive = false;
+
     }
 }

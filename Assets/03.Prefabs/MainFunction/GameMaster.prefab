@@ -101,11 +101,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44d38c99d5107f945b1b8bdd57996e85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  putLog: 0
-  log: []
   dataPath: 
   _record: 0
   _overwrite: 1
+  putLog: 0
+  log: []
 --- !u!1 &1904746496601862995
 GameObject:
   m_ObjectHideFlags: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.14
+  gameVersion: 0.16
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
@@ -205,6 +205,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 041548d59daadd443a04f9e783070055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dataPath: 
+  _GS_Resolution: 0
+  _GS_Window: 0
+  _GS_Brightness: 0
+  _GS_Master: 0
+  _GS_Effects: 0
+  _GS_Interface: 0
+  _GS_Music: 0
+  _GS_MuteSound: 0
+  _GS_MuteBackgoundMusic: 0
+  _GS_Language: 0
+  _GS_UnitHPBar: 0
 --- !u!1 &3371686537898075843
 GameObject:
   m_ObjectHideFlags: 0
