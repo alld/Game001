@@ -573,6 +573,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (unit._poolUnit._isAssign == false) return;
         if (other.CompareTag(tag_Trigger) == true) return;
         if (other.gameObject.GetInstanceID() == this.gameObject.GetInstanceID()) return;
         if (other.TryGetComponent<Panel_BasicUnitController>(out tempVar_Unit) == false)

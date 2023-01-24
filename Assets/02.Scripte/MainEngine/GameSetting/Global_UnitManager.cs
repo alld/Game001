@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnitGaugeSample;
 using UnityEngine.UI;
+using UnitSample;
+using JetBrains.Annotations;
 
 public class Global_UnitManager : MonoBehaviour
 {
@@ -44,7 +46,6 @@ public class Global_UnitManager : MonoBehaviour
         }
 
         temp_number = _poolHPBar_count[0];
-        _poolHPBar_count.RemoveAt(0);
         _poolHPbar[temp_number]._isAssign = true;
 
 
@@ -65,6 +66,7 @@ public class Global_UnitManager : MonoBehaviour
     }
     #endregion
 
+    #region 유닛 풀
     public List<UnitPool> _poolUnit = new List<UnitPool>();
     public List<int> _poolUnit_count = new List<int>();
     public GameObject prefab_Unit;
@@ -72,45 +74,50 @@ public class Global_UnitManager : MonoBehaviour
     public Mesh[] _meshList;
     public Material[] _materialList;
 
-    public UnitGauge PoolSetUnit()
-    {
-        int temp_number;
-        if (_poolHPBar_count.Count == 1)
-        {
-            PoolAddUnit();
-        }
-
-        temp_number = _poolHPBar_count[0];
-        _poolHPBar_count.RemoveAt(0);
-        _poolHPbar[temp_number]._isAssign = true;
-
-
-        return _poolHPbar[temp_number];
-    }
-
     public void PoolRemoveUnit(int poolnumber)
     {
+        _poolUnit[poolnumber].OnUnActived();
         _poolHPBar_count.Add(poolnumber);
     }
 
-    private void PoolAddUnit()
+
+    /// <summary>
+    /// (풀:기능) 여유 유닛이 있는지 체크하여 부족할 경우 풀의 공간을 확보합니다.  
+    /// </summary>
+    public void PoolCheckUnit()
     {
-        for (int i = 0; i < AddNumber; i++)
+        if (_poolUnit_count.Count <= 3)
         {
-            Instantiate(prefab_HPBar, canvas.transform);
+            for (int i = 0; i < AddNumber; i++)
+            {
+                Instantiate(prefab_Unit, transform);
+            }
         }
     }
 
+    #endregion
 
+}
+
+namespace UnitSample
+{
     public class UnitPool
     {
-        GameObject _prefab;
-        GameObject _gameObject;
+        public GameObject _thisObject;
 
+        public delegate void DeleUnitActive();
+        public DeleUnitActive OnActived;
+        public DeleUnitActive OnUnActived;
         
+        private int poolNumber;
+        private bool isAssign = false;
+        public bool _isAssign { get; set; }
+
+        public void SetPoolNumber()
+        {
+            poolNumber = GameManager._instance._unitManager._poolUnit.Count - 1;
+        }
     }
-
-
 }
 
 
@@ -137,6 +144,7 @@ namespace UnitGaugeSample
                 if (value == true)
                 {
                     poolNumber = GameManager._instance._unitManager._poolHPBar_count[0];
+                    GameManager._instance._unitManager._poolHPBar_count.RemoveAt(0);
                 }
                 else
                 {

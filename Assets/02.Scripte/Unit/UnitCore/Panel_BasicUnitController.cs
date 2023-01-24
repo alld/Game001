@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnitGaugeSample;
 using static Panel_BasicUnitAI;
+using UnitSample;
 
 public class Panel_BasicUnitController : MonoBehaviour
 {
     public enum eUnitKind
     {
+        None,
         A,
         B,
         C
@@ -24,23 +26,42 @@ public class Panel_BasicUnitController : MonoBehaviour
     public float _animationTime_attackEnd = 1f;
     public float _animationTime_attacked = 1f;
 
-    public eUnitKind unitKind = eUnitKind.A;
+    public eUnitKind unitKind = eUnitKind.None;
     // 고려
     public Data_NormalUnit.UnitState unitState;
     private Panel_BasicUnitAI AI = null;
 
     public UnitGauge _HPbar = null;
 
-    private void Awake()
-    {
-        StartCoroutine(Init());
+    public UnitPool _poolUnit = null;
 
+    private void Start()
+    {
+        _poolUnit = new UnitPool();
+        GameManager._instance._unitManager._poolUnit.Add(_poolUnit);
+        _poolUnit._thisObject = gameObject;
+
+        _poolUnit.OnActived = OnPoolEnable;
+        _poolUnit.OnUnActived = OnPoolDisable;
+        if (unitKind == eUnitKind.None) // 유닛풀에서 생성된 유닛 
+        {
+            GameManager._instance._unitManager._poolUnit_count.Add(GameManager._instance._unitManager._poolUnit.Count - 1);
+
+            gameObject.SetActive(false);
+
+        }
+        else  // 에디터상에 배치되어있는 유닛
+        {
+            _poolUnit.SetPoolNumber();
+
+            GameManager._instance._unitManager.PoolCheckUnit();
+
+            _poolUnit.OnActived();
+        }
     }
 
-    private IEnumerator Init()
+    private void Init()
     {
-        yield return null;
-
         AI = GetComponent<Panel_BasicUnitAI>();
         unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
@@ -49,7 +70,6 @@ public class Panel_BasicUnitController : MonoBehaviour
         InitHPbar();
 
         _model.SetMesh(unitKind);
-
     }
 
     private void InitHPbar()
@@ -61,18 +81,6 @@ public class Panel_BasicUnitController : MonoBehaviour
         _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
 
         AI.HPBarMove();
-    }
-
-    private void OnEnable()
-    {
-        if (GameManager._instance != null && AI != null)
-        {
-            GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
-            AI.AutoScheduler(ePattern.Continue);
-
-            if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
-        }
-        else StartCoroutine(StandbyGameManager());
     }
 
     /// <summary>
@@ -91,19 +99,26 @@ public class Panel_BasicUnitController : MonoBehaviour
         AI.AutoScheduler(ePattern.Continue);
     }
 
-    private void OnDisable()
+    public void OnPoolEnable()
     {
+        Init();
 
-        if (GameManager._instance._unitManager != null)
-        {
-            if (_HPbar != null) _HPbar._isActive = false;
-            GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
-        }
+        GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
+        AI.AutoScheduler(ePattern.Continue);
 
+        AI._cognitiveRange.enabled = true;
+
+        if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
     }
 
+    public void OnPoolDisable()
+    {
+        if (_HPbar != null) _HPbar._isAssign = false;
+        GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
 
-
+        AI._cognitiveRange.enabled = false;
+        gameObject.SetActive(false);
+    }
 
     public bool EventDamage(Panel_BasicUnitController opponent)
     {
