@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+
+    public GameObject testUnit; 
+
     public string gameVersion = "0.00";
     public static bool FinishSetting = false;
 

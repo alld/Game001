@@ -94,6 +94,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 202d872ea280be2469bfe7b9c9c727de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _projectile: {fileID: 0}
+  _attackedEffect: {fileID: 0}
+  _model: {fileID: 0}
+  _animationTime_attackStart: 1
+  _animationTime_attackEnd: 1
+  _animationTime_attacked: 1
   unitKind: 0
   unitState:
     ID: 2
@@ -119,6 +125,9 @@ MonoBehaviour:
     _addPriority: 0
     _accuracy: 0
     _avoid: 0
+    _attackType: 0
+    _defendType: 0
+    _property: 0
     _vitaldefend: 0
     _critical: 0
     criticalHit: 0
@@ -128,6 +137,13 @@ MonoBehaviour:
     _fear: 0
     _mental: 0
     _beneficial: 0
+    _attackspeed: 0
+    _rangeattack: 0
+    _isRotting: 0
+  _HPbar:
+    _bar: {fileID: 0}
+    _frame: {fileID: 0}
+    _gauge: {fileID: 0}
 --- !u!114 &5356843743929178433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,6 +160,7 @@ MonoBehaviour:
   _cognitiveRange: {fileID: 0}
   _loopCheckDelay: 1
   _loopSleepDelay: 3
+  _loopRotDelay: 5
   _scheduler: 
 --- !u!143 &5356843743929178432
 CharacterController:

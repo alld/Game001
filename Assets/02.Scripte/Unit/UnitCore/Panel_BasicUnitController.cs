@@ -18,6 +18,8 @@ public class Panel_BasicUnitController : MonoBehaviour
     /// <summary> (prefab) 피격효과 프리팹입니다. </summary>
     public GameObject _attackedEffect;
 
+    public Graphic_Model _model;
+
     public float _animationTime_attackStart = 1f;
     public float _animationTime_attackEnd = 1f;
     public float _animationTime_attacked = 1f;
@@ -31,18 +33,27 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     private void Awake()
     {
+        StartCoroutine(Init());
+
+    }
+
+    private IEnumerator Init()
+    {
+        yield return null;
+
         AI = GetComponent<Panel_BasicUnitAI>();
         unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
         AIInit();
 
-        StartCoroutine(InitHPbar());
+        InitHPbar();
+
+        _model.SetMesh(unitKind);
+
     }
 
-    private IEnumerator InitHPbar()
+    private void InitHPbar()
     {
-        yield return null;
-
         _HPbar = GameManager._instance._unitManager.PoolSetUnitGauge();
 
         _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
@@ -54,12 +65,12 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     private void OnEnable()
     {
-        if (GameManager._instance != null)
+        if (GameManager._instance != null && AI != null)
         {
             GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
             AI.AutoScheduler(ePattern.Continue);
 
-            if(_HPbar._bar != null)_HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
+            if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
         }
         else StartCoroutine(StandbyGameManager());
     }
@@ -71,7 +82,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     /// <returns></returns>
     protected IEnumerator StandbyGameManager()
     {
-        while (GameManager._instance == null)
+        while (GameManager._instance == null || AI == null)
         {
             yield return new WaitForSeconds(2.0f);
         }
@@ -85,9 +96,10 @@ public class Panel_BasicUnitController : MonoBehaviour
 
         if (GameManager._instance._unitManager != null)
         {
-            if (_HPbar != null)_HPbar._isActive = false;
+            if (_HPbar != null) _HPbar._isActive = false;
             GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
         }
+
     }
 
 
@@ -96,7 +108,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     public bool EventDamage(Panel_BasicUnitController opponent)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState);
-        if(check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
+        if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
         _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
         return check;
     }
@@ -112,7 +124,7 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     IEnumerator OnEffectAttacked()
     {
-        
+
         yield break;
     }
 

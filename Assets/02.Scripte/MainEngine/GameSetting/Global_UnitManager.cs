@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class Global_UnitManager : MonoBehaviour
 {
     [Header("오브젝트 풀")]
-    public GameObject prefab_HPBar;
     public GameObject canvas;
+    private const int AddNumber = 5;
 
     public delegate void DeleChangeUnit(int objectID);
     public DeleChangeUnit OnStateChangeUnit;
@@ -27,11 +27,13 @@ public class Global_UnitManager : MonoBehaviour
         OnStateChangeUnit = null;
     }
 
-    public List<UnitPool> _poolUnit = new List<UnitPool>();
+
+
+    #region HP바 UI풀
     [HideInInspector]
     public List<UnitGauge> _poolHPbar = new List<UnitGauge>();
     public List<int> _poolHPBar_count = new List<int>();
-    private const int AddNumber = 5;
+    public GameObject prefab_HPBar;
 
     public UnitGauge PoolSetUnitGauge()
     {
@@ -61,6 +63,44 @@ public class Global_UnitManager : MonoBehaviour
             Instantiate(prefab_HPBar, canvas.transform);
         }
     }
+    #endregion
+
+    public List<UnitPool> _poolUnit = new List<UnitPool>();
+    public List<int> _poolUnit_count = new List<int>();
+    public GameObject prefab_Unit;
+
+    public Mesh[] _meshList;
+    public Material[] _materialList;
+
+    public UnitGauge PoolSetUnit()
+    {
+        int temp_number;
+        if (_poolHPBar_count.Count == 1)
+        {
+            PoolAddUnit();
+        }
+
+        temp_number = _poolHPBar_count[0];
+        _poolHPBar_count.RemoveAt(0);
+        _poolHPbar[temp_number]._isAssign = true;
+
+
+        return _poolHPbar[temp_number];
+    }
+
+    public void PoolRemoveUnit(int poolnumber)
+    {
+        _poolHPBar_count.Add(poolnumber);
+    }
+
+    private void PoolAddUnit()
+    {
+        for (int i = 0; i < AddNumber; i++)
+        {
+            Instantiate(prefab_HPBar, canvas.transform);
+        }
+    }
+
 
     public class UnitPool
     {

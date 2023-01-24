@@ -200,7 +200,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.19
+  testUnit: {fileID: 0}
+  gameVersion: 0.20
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
@@ -307,10 +308,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34890126446f1c2488d07fa107608a11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab_HPBar: {fileID: 3166851338439858107, guid: 5207428a7e9d3b3439e18c0bfdfe013f, type: 3}
   canvas: {fileID: 0}
   _poolHPbar: []
   _poolHPBar_count: 
+  prefab_HPBar: {fileID: 3166851338439858107, guid: 5207428a7e9d3b3439e18c0bfdfe013f, type: 3}
+  _poolUnit_count: 
+  prefab_Unit: {fileID: 0}
+  _meshList:
+  - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  _materialList:
+  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!1 &3373447788818630364
 GameObject:
   m_ObjectHideFlags: 0
