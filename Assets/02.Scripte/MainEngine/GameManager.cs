@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviour
     /// <param name="addScene">현재 씬에 다른씬을 추가할지를 결정합니다. </param>
     public void ChangeScene(SceneN sceneName, bool addScene = false)
     {
+        SceneArrange();
         string changeSceneName = this.sceneName[(int)sceneName];
         if (addScene == true)
         {
@@ -86,5 +87,14 @@ public class GameManager : MonoBehaviour
             currentScene.Clear();
             currentScene.Add(changeSceneName);
         }
+    }
+
+    /// <summary>
+    /// (기능)
+    /// <br>씬을 전환하기전에 호출하여 씬에 배치되어있는 모든 오브젝트들을 정리합니다.</br>
+    /// </summary>
+    public void SceneArrange()
+    {
+        _unitManager.PoolAllRemoveUnit();
     }
 }

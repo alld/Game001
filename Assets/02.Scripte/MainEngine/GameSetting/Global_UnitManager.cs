@@ -30,11 +30,11 @@ public class Global_UnitManager : MonoBehaviour
     }
 
 
-
     #region HP바 UI풀
+    [Header("UI풀 - HPbar")]
+    public List<int> _poolHPBar_count = new List<int>();
     [HideInInspector]
     public List<UnitGauge> _poolHPbar = new List<UnitGauge>();
-    public List<int> _poolHPBar_count = new List<int>();
     public GameObject prefab_HPBar;
 
     public UnitGauge PoolSetUnitGauge()
@@ -65,21 +65,48 @@ public class Global_UnitManager : MonoBehaviour
         }
     }
     #endregion
-
     #region 유닛 풀
-    public List<UnitPool> _poolUnit = new List<UnitPool>();
-    public List<int> _poolUnit_count = new List<int>();
-    public GameObject prefab_Unit;
-
+    [Header("Unit 풀")]
     public Mesh[] _meshList;
     public Material[] _materialList;
+    public List<int> _poolUnit_count = new List<int>();
+    public List<UnitPool> _poolUnit = new List<UnitPool>();
+    public GameObject prefab_Unit;
+
 
     public void PoolRemoveUnit(int poolnumber)
     {
         _poolUnit[poolnumber].OnUnActived();
+        _poolUnit[poolnumber]._isAssign = false;
         _poolHPBar_count.Add(poolnumber);
     }
 
+    public void PoolAllRemoveUnit()
+    {
+        _poolUnit_count.Clear();
+        for (int i = 0; i < _poolUnit.Count -1; i++)
+        {
+            _poolUnit[i].OnUnActived();
+            _poolUnit[i]._isAssign = false;
+            _poolHPBar_count.Add(i);
+        }
+    }
+
+    /// <summary>
+    /// (풀:기능) 풀 공간에 할당되지않은 유닛을 불러옵니다. 
+    /// <br> 해당기능이 호출되면 해당 유닛의 값이 변동되니 할당이 필요한 경우에만 호출해야합니다.</br>
+    /// </summary>
+    /// <returns></returns>
+    public UnitPool GetPoolUnit()
+    {
+        PoolCheckUnit();
+
+        int temp_number = _poolUnit_count[0];
+        _poolUnit[temp_number]._isAssign = true;
+
+
+        return _poolUnit[temp_number];
+    }
 
     /// <summary>
     /// (풀:기능) 여유 유닛이 있는지 체크하여 부족할 경우 풀의 공간을 확보합니다.  
@@ -111,10 +138,33 @@ namespace UnitSample
         
         private int poolNumber;
         private bool isAssign = false;
-        public bool _isAssign { get; set; }
+        public bool _isAssign 
+        {
+            get 
+            {
+                return isAssign;
+            }
+            set
+            {
+                isAssign = value;
+                if(value == true)
+                {
+                    GameManager._instance._unitManager._poolUnit_count.Remove(poolNumber);
+                }
+                else
+                {
+                    if (GameManager._instance._unitManager._poolUnit_count.Exists(x => x == poolNumber) == false) 
+                    {
+                        GameManager._instance._unitManager._poolUnit_count.Add(poolNumber);
+                        _thisObject.transform.SetParent(GameManager._instance._unitManager.transform);
+                    }
+                }
+            } 
+        }
 
         public void SetPoolNumber()
         {
+            GameManager._instance._unitManager._poolUnit_count.Add(GameManager._instance._unitManager._poolUnit.Count - 1);
             poolNumber = GameManager._instance._unitManager._poolUnit.Count - 1;
         }
     }

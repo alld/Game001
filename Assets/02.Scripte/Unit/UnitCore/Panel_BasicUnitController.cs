@@ -33,26 +33,27 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     public UnitGauge _HPbar = null;
 
+    [HideInInspector]
     public UnitPool _poolUnit = null;
 
     private void Start()
     {
         _poolUnit = new UnitPool();
         GameManager._instance._unitManager._poolUnit.Add(_poolUnit);
+        _poolUnit.SetPoolNumber();
         _poolUnit._thisObject = gameObject;
 
         _poolUnit.OnActived = OnPoolEnable;
         _poolUnit.OnUnActived = OnPoolDisable;
         if (unitKind == eUnitKind.None) // 유닛풀에서 생성된 유닛 
         {
-            GameManager._instance._unitManager._poolUnit_count.Add(GameManager._instance._unitManager._poolUnit.Count - 1);
-
             gameObject.SetActive(false);
 
         }
         else  // 에디터상에 배치되어있는 유닛
         {
-            _poolUnit.SetPoolNumber();
+
+            _poolUnit._isAssign = true;
 
             GameManager._instance._unitManager.PoolCheckUnit();
 
