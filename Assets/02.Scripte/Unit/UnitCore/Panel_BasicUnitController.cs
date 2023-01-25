@@ -36,8 +36,16 @@ public class Panel_BasicUnitController : MonoBehaviour
     [HideInInspector]
     public UnitPool _poolUnit = null;
 
+    private bool InitCheck = false;
+
     private void Start()
     {
+        StartCoroutine(DelayStart());
+    }
+
+    private IEnumerator DelayStart()
+    {
+        yield return null;
         _poolUnit = new UnitPool();
         GameManager._instance._unitManager._poolUnit.Add(_poolUnit);
         _poolUnit.SetPoolNumber();
@@ -59,18 +67,17 @@ public class Panel_BasicUnitController : MonoBehaviour
 
             _poolUnit.OnActived();
         }
+
+        Init();
+
+        InitCheck = true;
     }
 
     private void Init()
     {
         AI = GetComponent<Panel_BasicUnitAI>();
-        unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
-        AIInit();
-
-        InitHPbar();
-
-        _model.SetMesh(unitKind);
+        AI.InitAI();
     }
 
     private void InitHPbar()
@@ -102,7 +109,17 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     public void OnPoolEnable()
     {
-        Init();
+        StartCoroutine(DelayEnable());
+    }
+
+    public IEnumerator DelayEnable()
+    {
+        while (InitCheck == false)
+        {
+            yield return null;
+        }
+
+        GameUnitInit();
 
         GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
         AI.AutoScheduler(ePattern.Continue);
@@ -151,9 +168,13 @@ public class Panel_BasicUnitController : MonoBehaviour
     }
 
 
-    protected void AIInit()
+    protected void GameUnitInit()
     {
-        AI.InitAI();
+        unitState = new Data_NormalUnit.UnitState((int)unitKind);
+
+        InitHPbar();
+
+        _model.SetMesh(unitKind);
 
         UpdateAIVariable();
     }

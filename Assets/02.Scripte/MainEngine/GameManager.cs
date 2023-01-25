@@ -96,5 +96,7 @@ public class GameManager : MonoBehaviour
     public void SceneArrange()
     {
         _unitManager.PoolAllRemoveUnit();
+
+        _unitManager.PoolAllRemoveUnitGauge();
     }
 }

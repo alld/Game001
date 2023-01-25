@@ -2,9 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnitGaugeSample;
-using UnityEngine.UI;
 using UnitSample;
-using JetBrains.Annotations;
 
 public class Global_UnitManager : MonoBehaviour
 {
@@ -40,7 +38,7 @@ public class Global_UnitManager : MonoBehaviour
     public UnitGauge PoolSetUnitGauge()
     {
         int temp_number;
-        if(_poolHPBar_count.Count == 1)
+        if(_poolHPBar_count.Count <= 1)
         {
             PoolAddUnitGauge();
         }
@@ -55,6 +53,15 @@ public class Global_UnitManager : MonoBehaviour
     public void PoolRemoveUnitGauge(int poolnumber)
     {
         _poolHPBar_count.Add(poolnumber);
+    }
+
+    public void PoolAllRemoveUnitGauge()
+    {
+        _poolHPBar_count.Clear();
+        for (int i = 0; i < _poolHPbar.Count; i++)
+        {
+            _poolHPbar[i]._isAssign = false;
+        }
     }
 
     private void PoolAddUnitGauge()
@@ -173,6 +180,8 @@ namespace UnitSample
 
 namespace UnitGaugeSample
 {
+    using UnityEngine.UI;
+
     [System.Serializable]
     public class UnitGauge
     {
@@ -199,6 +208,7 @@ namespace UnitGaugeSample
                 else
                 {
                     GameManager._instance._unitManager.PoolRemoveUnitGauge(poolNumber);
+                    _bar.transform.SetParent(GameManager._instance._unitManager.transform);
                 }
             }
         }
