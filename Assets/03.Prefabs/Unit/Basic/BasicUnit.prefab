@@ -1267,6 +1267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unit: {fileID: 0}
+  animator: {fileID: 4865735792765129116}
   _cognitiveRange: {fileID: 0}
   _loopCheckDelay: 1
   _loopSleepDelay: 3

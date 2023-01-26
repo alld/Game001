@@ -9,6 +9,20 @@ public class Panel_BasicUnitAI : MonoBehaviour
 {
     private const string tag_Trigger = "Trigger";
 
+    #region 애니메이션 이름
+    /// <summary> (트리거) 애니메이션 이름</summary>
+    private const string ani_attacked = "attacked";
+    /// <summary> (트리거) 애니메이션 이름</summary>
+    private const string ani_death = "death";
+    /// <summary> (스위치) 애니메이션 이름</summary>
+    private const string ani_skill = "skill";
+    /// <summary> (스위치) 애니메이션 이름</summary>
+    private const string ani_attack = "attack";
+    /// <summary> (스위치) 애니메이션 이름</summary>
+    private const string ani_move = "move";
+
+    #endregion
+
     #region 캐시처리
     [HideInInspector] public Panel_BasicUnitController unit;
     private CharacterController unitCtrl = null;
@@ -17,7 +31,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     private WaitForSeconds rotdelayTime = null;
     public WaitForSeconds delayAttackTiming = null;
     public WaitForSeconds delayAttackEnd = null;
-
+    public Animator animator = null;
 
     [HideInInspector] public SphereCollider _cognitiveRange = null;
     #endregion
@@ -366,6 +380,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
                 _currentAction = null;
                 break;
             }
+            PlayAnimationMove();
             if (_currentAction == null) _currentAction = StartCoroutine(Action_Move());
             yield return delayTime;
         }
@@ -382,6 +397,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
                 _currentAction = null;
                 break;
             }
+            PlayAnimationAttack();
             if (_currentAction == null) _currentAction = StartCoroutine(Action_Attack());
             yield return delayAttackTiming;
             yield return delayAttackEnd;
@@ -438,6 +454,8 @@ public class Panel_BasicUnitAI : MonoBehaviour
     /// <returns></returns>
     protected IEnumerator PT_Stand()
     {
+        PlayAnimationIdle();
+
         ePattern checkPattern = ePattern.Stand;
         while (checkPattern == ePattern.Stand)
         {
@@ -632,6 +650,31 @@ public class Panel_BasicUnitAI : MonoBehaviour
     {
         unit._HPbar._bar.transform.position = Camera.main.WorldToScreenPoint(transform.position + HpbarHeight);
     }
+
+    #region 애니메이션
+
+    public void PlayAnimationIdle()
+    {
+        animator.SetBool(ani_move, false);
+        animator.SetBool(ani_attack, false);
+        animator.SetBool(ani_skill, false);
+    }
+
+    public void PlayAnimationAttack()
+    {
+        animator.SetBool(ani_attack, true);
+        animator.SetBool(ani_move, false);
+        animator.SetBool(ani_skill, false);
+    }
+
+    public void PlayAnimationMove()
+    {
+        animator.SetBool(ani_move, true);
+        animator.SetBool(ani_attack, false);
+        animator.SetBool(ani_skill, false);
+    }
+
+    #endregion
 
 
     /// <summary>

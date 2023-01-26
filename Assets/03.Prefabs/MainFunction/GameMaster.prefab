@@ -200,7 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.23
+  gameVersion: 0.24
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
@@ -308,9 +308,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 0}
+  prefab_HPBar: {fileID: 3166851338439858107, guid: 5207428a7e9d3b3439e18c0bfdfe013f, type: 3}
   _poolHPBar_count: 
   _poolHPbar: []
-  prefab_HPBar: {fileID: 3166851338439858107, guid: 5207428a7e9d3b3439e18c0bfdfe013f, type: 3}
+  prefab_FlowText: {fileID: 0}
+  _poolFlowText_count: 
+  _poolFlowText: []
+  prefab_Unit: {fileID: 5356843743929178441, guid: 1b2b4e235ef37224fab62b069512955f, type: 3}
   _meshList:
   - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   - {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
@@ -318,7 +322,6 @@ MonoBehaviour:
   - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
   _poolUnit_count: 
-  prefab_Unit: {fileID: 5356843743929178441, guid: 1b2b4e235ef37224fab62b069512955f, type: 3}
 --- !u!1 &3373447788818630364
 GameObject:
   m_ObjectHideFlags: 0
