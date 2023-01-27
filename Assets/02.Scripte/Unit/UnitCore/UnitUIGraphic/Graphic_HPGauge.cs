@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnitGaugeSample;
+using UnityEngine;
 
 public class Graphic_HPGauge : MonoBehaviour
 {

@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using EnumError;
-using System.Text;
-using System.IO;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using UnityEngine;
 
 namespace EnumError
 {
@@ -65,7 +64,7 @@ public class Global_LogManager : MonoBehaviour
         log.Add(SB.ToString());
         if (putLog == true)
         {
-            Debug.Log(log[log.Count-1]);
+            Debug.Log(log[log.Count - 1]);
         }
 
         RecordLog();

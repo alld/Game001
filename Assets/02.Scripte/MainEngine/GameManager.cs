@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -52,12 +51,12 @@ public class GameManager : MonoBehaviour
         _logManager.dataPath = Application.persistentDataPath + "/ErrorLog.txt"; // 로그매니저의 텍스트파일 저장경로를 지정합니다. 
         _gameSetting.dataPath = Application.persistentDataPath + "/GameSetting.txt"; // 환경설정의 텍스트파일 저장경로를 지정합니다. 
 
-        _gameSetting.Init(); 
+        _gameSetting.Init();
 
         _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
         _unitManager.Init();
-     
+
         FinishSetting = true; // 모든 설정이 끝나면 메인씬을 불러옵니다.
 
     }
