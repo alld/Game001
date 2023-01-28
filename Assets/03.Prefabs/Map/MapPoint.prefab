@@ -143,5 +143,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapData:
+    _thisMapTile: 0
     _thisObject: {fileID: 8612308208024112150}
     _mapFloor: {fileID: 0}
+    _isAssignAddPoint: 0
+    _isDungeon: 0
+    _isBoundaryConnect: 0
+    tempMesh: {fileID: 8612308206923400789}

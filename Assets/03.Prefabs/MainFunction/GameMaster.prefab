@@ -200,7 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.25
+  gameVersion: 0.26
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
@@ -366,8 +366,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9545f21fe6b49404ca87f9098a001684, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  materials:
+  - {fileID: 2100000, guid: ec098cdd05e99774783d4d0a1b961021, type: 2}
+  - {fileID: 2100000, guid: 443f0ea8ec463d2408b7480ee3cacadb, type: 2}
+  - {fileID: 2100000, guid: 79e33efd7ad5b354da378901e4b8471c, type: 2}
+  - {fileID: 2100000, guid: 587e146edf9f996489dd9bac78de9e18, type: 2}
+  - {fileID: 2100000, guid: 1621c6dbd62d39846b8228e26e9bcf8e, type: 2}
+  - {fileID: 2100000, guid: 133f9d23a602a32428fab252b82f2eda, type: 2}
+  - {fileID: 2100000, guid: b6029e78a93161a4db0c221403a6f12a, type: 2}
+  - {fileID: 2100000, guid: 325cdaf014d7bf14d84b5617d068876c, type: 2}
+  - {fileID: 2100000, guid: b9292966ad16ec1498b91909bc4b6926, type: 2}
+  - {fileID: 2100000, guid: e592a9bef8691154696dc966fa70f6b0, type: 2}
   prefab_MapData: {fileID: 8612308208024112145, guid: 371e41967e20e7f4f968e7034dc9e085, type: 3}
   MapDataList: []
   _editorSetting: 0
   _initMapPointCount: 10
-  StandardMap_1th: 01000000030000000400000006000000
+  StandardMap_1th: 02000000040000000500000007000000
+  _completSetting: 0
+  _completReady: 0

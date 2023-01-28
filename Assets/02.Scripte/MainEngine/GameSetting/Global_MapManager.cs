@@ -1,10 +1,13 @@
 using MapSample;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class Global_MapManager : MonoBehaviour
 {
+    public Material[] materials; // 임시 테스트용
+
     /// <summary>
     /// 한 장소이 가지고있는 고유 특징
     /// </summary>
@@ -69,20 +72,23 @@ public class Global_MapManager : MonoBehaviour
     private Dictionary<eMapAreaKind, int> StandardMap_2th = new Dictionary<eMapAreaKind, int>();
     private List<eMapTileKind> StandardMap_3th = new List<eMapTileKind>();
 
+    public bool _completSetting = false;
+    public bool _completReady = false;
 
-    public void CreateFiled()
+    public void CreateField(Transform field)
     {
-
+        GameObject temp_object;
         for (int x = 0; x < MapSizeX; x++)
         {
             for (int y = 0; y < MapSizeY; y++)
             {
-                Instantiate(prefab_MapData);
+                temp_object = Instantiate(prefab_MapData, field);
+                temp_object.name += string.Format("{0},{1}", x, y);
             }
         }
     }
 
-    private void SetInitRandomFiledData()
+    private void SetInitRandomTiledData()
     {
         for (int i = 0; i < StandardMap_1th.Length; i++)
         {
@@ -156,7 +162,7 @@ public class Global_MapManager : MonoBehaviour
     {
         MapDataList.Add(mapData);
 
-        if (MapDataList.Count == MapSizeX * MapSizeY) SettingMapData();
+        if (MapDataList.Count == MapSizeX * MapSizeY) StartCoroutine(SettingMapData());
     }
 
     protected void SetMapDataPosition()
@@ -172,11 +178,22 @@ public class Global_MapManager : MonoBehaviour
         }
     }
 
-    protected void SettingMapData()
+    protected IEnumerator SettingMapData()
     {
+        yield return null;
         SetMapDataPosition();
+
+        SetInitRandomTiledData();
+
+        SetPlayerPosition();
+
+        _completSetting = true;
     }
 
+    protected void SetPlayerPosition()
+    {
+        MapDataXY[(int)Mathf.Round(MapSizeX * 0.5f), (int)Mathf.Round(MapSizeY * 0.5f)].ChangeTiled(eMapTileKind.Player);
+    }
 
 
     /*
@@ -219,7 +236,9 @@ namespace MapSample
         public Dictionary<eMapTileKind, int> _thisTilePoint = new Dictionary<eMapTileKind, int>();
         private MapData[,] mm_MapData; // 맵 매니저의 캐시
         public bool _isDungeon;
-        private bool _isBoundaryConnect;
+        public bool _isBoundaryConnect;
+
+        public MeshRenderer tempMesh; // 임시 테스트용
 
         private float positionX;
         public float _positionX
@@ -231,7 +250,7 @@ namespace MapSample
             set
             {
                 positionX = value;
-                _thisObject.position.Set(value * 20, _thisObject.position.y, _thisObject.position.z);
+                _thisObject.position = new Vector3(value * 20, _thisObject.position.y, _thisObject.position.z);
                 if (value == 0 || value == MapSizeX - 1) _isBoundaryConnect = true;
             }
         }
@@ -246,7 +265,7 @@ namespace MapSample
             set
             {
                 positionY = value;
-                _thisObject.position.Set(_thisObject.position.x, value * 20, _thisObject.position.z);
+                _thisObject.position = new Vector3(_thisObject.position.x, _thisObject.position.y, value * 20);
                 if (value == 0 || value == MapSizeY - 1) _isBoundaryConnect = true;
 
             }
@@ -270,13 +289,26 @@ namespace MapSample
 
             if (_thisTilePoint.TryAdd(mapTileKind, point) == false) _thisTilePoint[mapTileKind] += point;
 
-
-            if (TryGetPosition((int)_positionX - 1, (int)_positionY - 1)) mm_MapData[(int)_positionX - 1, (int)_positionY - 1].SetAddPoint(mapTileKind, (int)(point * 0.5f));
-            if (TryGetPosition((int)_positionX - 1, (int)_positionY + 1)) mm_MapData[(int)_positionX - 1, (int)_positionY + 1].SetAddPoint(mapTileKind, (int)(point * 0.5f));
-            if (TryGetPosition((int)_positionX + 1, (int)_positionY - 1)) mm_MapData[(int)_positionX + 1, (int)_positionY - 1].SetAddPoint(mapTileKind, (int)(point * 0.5f));
-            if (TryGetPosition((int)_positionX + 1, (int)_positionY + 1)) mm_MapData[(int)_positionX + 1, (int)_positionY + 1].SetAddPoint(mapTileKind, (int)(point * 0.5f));
+            AddPointAdjacentTile(mapTileKind, (int)(point * 0.5));
             ChangeTiled();
             return true;
+        }
+
+        private void AddPointAdjacentTile(eMapTileKind mapTileKind, int addPoint)
+        {
+            EachAddPointAdjacentTile((int)_positionX - 1, (int)_positionY, mapTileKind, addPoint);
+            EachAddPointAdjacentTile((int)_positionX + 1, (int)_positionY, mapTileKind, addPoint);
+            EachAddPointAdjacentTile((int)_positionX, (int)_positionY - 1, mapTileKind, addPoint);
+            EachAddPointAdjacentTile((int)_positionX, (int)_positionY + 1, mapTileKind, addPoint);
+        }
+
+        private void EachAddPointAdjacentTile(int posX, int posY, eMapTileKind mapTileKind, int addPoint)
+        {
+            if (TryGetPosition(posX, posY))
+            {
+                mm_MapData[posX, posY].SetAddPoint(mapTileKind, addPoint);
+                mm_MapData[posX, posY].ChangeTiled();
+            }
         }
 
         public void SetAddPoint(eMapTileKind mapTileKind, int point)
@@ -296,11 +328,13 @@ namespace MapSample
         {
             _thisMapTile = _thisTilePoint.Max(x => x.Key);
             CheckTiled();
+            tempMesh.material = GameManager._instance._mapManager.materials[(int)_thisMapTile];
         }
         public void ChangeTiled(eMapTileKind setTile)
         {
             _thisMapTile = setTile;
             CheckTiled();
+            tempMesh.material = GameManager._instance._mapManager.materials[(int)_thisMapTile];
         }
 
         private void CheckTiled()
@@ -310,16 +344,17 @@ namespace MapSample
         }
         private void CheckWater()
         {
+            if (_isBoundaryConnect == true) return;
             _isBoundaryConnect = MapConnectConditionCheck(eMapTileKind.Water);
         }
 
         private bool MapConnectConditionCheck(eMapTileKind sel_map)
         {
             if (_thisMapTile == eMapTileKind.None) return false;
-            if (MapStatCondition((int)_positionX - 1, (int)_positionY - 1, eMapTileKind.Water)) return true;
-            if (MapStatCondition((int)_positionX - 1, (int)_positionY + 1, eMapTileKind.Water)) return true;
-            if (MapStatCondition((int)_positionX + 1, (int)_positionY - 1, eMapTileKind.Water)) return true;
-            if (MapStatCondition((int)_positionX + 1, (int)_positionY + 1, eMapTileKind.Water)) return true;
+            if (MapStatCondition((int)_positionX - 1, (int)_positionY, sel_map)) return true;
+            if (MapStatCondition((int)_positionX + 1, (int)_positionY, sel_map)) return true;
+            if (MapStatCondition((int)_positionX, (int)_positionY - 1, sel_map)) return true;
+            if (MapStatCondition((int)_positionX, (int)_positionY + 1, sel_map)) return true;
             return false;
         }
 
@@ -331,5 +366,6 @@ namespace MapSample
             }
             return false;
         }
+
     }
 }

@@ -86,6 +86,8 @@ public class GameManager : MonoBehaviour
             currentScene.Clear();
             currentScene.Add(changeSceneName);
         }
+
+        _mapManager._completReady = true;
     }
 
     /// <summary>

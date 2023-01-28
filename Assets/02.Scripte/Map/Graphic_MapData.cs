@@ -10,6 +10,5 @@ public class Graphic_MapData : MonoBehaviour
     void Start()
     {
         GameManager._instance._mapManager.SettingCountMapData(mapData);
-
     }
 }
