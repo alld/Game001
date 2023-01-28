@@ -37,7 +37,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     #endregion
 
     [Range(0.1f, 2f)]
-    public float _loopCheckDelay = 0.1f;
+    public float _loopCheckDelay = 1f;
     [Range(0.5f, 5f)]
     public float _loopSleepDelay = 3.0f;
     [Range(1f, 30f)]
@@ -54,6 +54,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
     protected List<Panel_BasicUnitController> _Info_nearbyTeam = new List<Panel_BasicUnitController>();
     protected List<Panel_BasicUnitController> _Info_nearbyEnemy = new List<Panel_BasicUnitController>();
 
+    public Dictionary<Panel_BasicUnitController, int> _EachPriority = new Dictionary<Panel_BasicUnitController, int>();
 
 
 
@@ -478,7 +479,6 @@ public class Panel_BasicUnitAI : MonoBehaviour
     /// </summary>
     protected ActionInfo DataCollection()
     {
-
         ActionInfo temp_ActionInfo = new ActionInfo(gameObject);
         if(unit.unitState._isLive == false)
         {
@@ -497,56 +497,29 @@ public class Panel_BasicUnitAI : MonoBehaviour
             return temp_ActionInfo;
         }
 
-        switch (unit.unitState._AIType)
+
+        var temp_Priority = _EachPriority.OrderByDescending(high => high.Value).Select(temp => temp.Key).FirstOrDefault();
+        if (GameManager._instance._teamSetting.GetTeamStatus(unit.unitState._TeamNumber, temp_Priority.unitState._TeamNumber) == true)
         {
-            case Data_BasicUnitData.eAIType.Normal:
-                var temp_Team = _Info_nearbyTeam.OrderByDescending(Team => Team.unitState._currentPriority).Select(Team => Team).FirstOrDefault();
-                var temp_Enemy = _Info_nearbyEnemy.OrderByDescending(Enemy => Enemy.unitState._currentPriority).Select(Enemy => Enemy).FirstOrDefault();
+            // 아군체력이감소할경우 회복 및 보조가 있을 경우 , 스킬, 없으면 붙어서 아군을 공격하는 적을 가격
+            if (unit.unitState._beneficial == false)
+            {
+                temp_ActionInfo.SetPatternType(ePattern.Stand);
+                return temp_ActionInfo;
+            }
+            // 추가로 이로운효과 판단 요소가 필요함
 
-                if (temp_Enemy == null)
-                {
-                    if (unit.unitState._beneficial == false || temp_Team == null)
-                    {
-                        temp_ActionInfo.SetPatternType(ePattern.Stand);
-                        break;
-                    }
-                    // 추가로 이로운효과 판단 요소가 필요함
-
-                    //임시
-                    temp_ActionInfo.SetTargetObject(temp_Team.gameObject);
-                    // 보유스킬 목록을 찾아서 스킬우선도가 높은걸 먼저 실행함 해당 스킬에서 스킬우선도 변경 조건이잇으면 거기서 반영
-                    temp_ActionInfo.SetPatternType(ePattern.Skill);
-                    break;
-                }
-                else if (temp_Team == null)
-                {
-                    temp_ActionInfo.SetTargetObject(temp_Enemy.gameObject);
-                    temp_ActionInfo.SetPatternType(ePattern.Attacking);
-                    break;
-                }
-
-
-
-                if (temp_Enemy.unitState._currentPriority < temp_Team.unitState._currentPriority)
-                {
-                    temp_ActionInfo.SetTargetObject(temp_Team.gameObject);
-                }
-                else
-                {
-                    temp_ActionInfo.SetTargetObject(temp_Enemy.gameObject);
-                    temp_ActionInfo.SetPatternType(ePattern.Attacking);
-                }
-                break;
-            case Data_BasicUnitData.eAIType.UnArmed:
-                break;
-            case Data_BasicUnitData.eAIType.Passive:
-                break;
-            case Data_BasicUnitData.eAIType.Active:
-                break;
-            case Data_BasicUnitData.eAIType.Aggressive:
-                break;
-            case Data_BasicUnitData.eAIType.Defensive:
-                break;
+            //임시
+            temp_ActionInfo.SetTargetObject(temp_Priority.gameObject);
+            // 보유스킬 목록을 찾아서 스킬우선도가 높은걸 먼저 실행함 해당 스킬에서 스킬우선도 변경 조건이잇으면 거기서 반영
+            temp_ActionInfo.SetPatternType(ePattern.Skill);
+            return temp_ActionInfo;
+        }
+        else if (GameManager._instance._teamSetting.GetEnemyStatus(unit.unitState._TeamNumber, temp_Priority.unitState._TeamNumber) == true)
+        {
+            temp_ActionInfo.SetTargetObject(temp_Priority.gameObject);
+            temp_ActionInfo.SetPatternType(ePattern.Attacking);
+            return temp_ActionInfo;
         }
 
         return temp_ActionInfo;
@@ -578,6 +551,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
         if (tempVar_Unit.unitState._isLive == false) return;
 
         _Info_nearbyUnits.Add(tempVar_Unit);
+        _EachPriority.Add(tempVar_Unit, tempVar_Unit.unitState._currentPriority);
         if (GameManager._instance._teamSetting.GetTeamStatus(unit.unitState._TeamNumber, tempVar_Unit.unitState._TeamNumber) == true)
         {
             _Info_nearbyTeam.Add(tempVar_Unit);
@@ -601,6 +575,7 @@ public class Panel_BasicUnitAI : MonoBehaviour
         }
         if (tempVar_Unit.unitState._isLive == false) return;
 
+        _EachPriority.Remove(tempVar_Unit);
         _Info_nearbyUnits.Remove(tempVar_Unit);
         _Info_nearbyTeam.Remove(tempVar_Unit);
         _Info_nearbyEnemy.Remove(tempVar_Unit);

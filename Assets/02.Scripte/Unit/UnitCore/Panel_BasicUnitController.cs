@@ -43,7 +43,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         StartCoroutine(DelayStart());
     }
 
-    private IEnumerator DelayStart()
+    protected IEnumerator DelayStart()
     {
         yield return null;
         _poolUnit = new UnitPool();
@@ -73,9 +73,33 @@ public class Panel_BasicUnitController : MonoBehaviour
         InitCheck = true;
     }
 
-    private void Init()
+    protected void Init()
     {
-        AI = GetComponent<Panel_BasicUnitAI>();
+        switch (unitState._AIType)
+        {
+            case Data_BasicUnitData.eAIType.Normal:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            case Data_BasicUnitData.eAIType.UnArmed:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            case Data_BasicUnitData.eAIType.Passive:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            case Data_BasicUnitData.eAIType.Active:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            case Data_BasicUnitData.eAIType.Aggressive:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            case Data_BasicUnitData.eAIType.Defensive:
+                AI = gameObject.AddComponent<Panel_BasicUnitAI>();
+                break;
+            default:
+                break;
+        }
+
+        AI.animator = _model._animator;
 
         AI.InitAI();
     }

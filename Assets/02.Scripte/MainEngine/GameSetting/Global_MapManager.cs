@@ -65,8 +65,8 @@ public class Global_MapManager : MonoBehaviour
 
     public MapData[,] MapDataXY = new MapData[MapSizeX, MapSizeY];
 
-    public const int MapSizeX = 10;
-    public const int MapSizeY = 10;
+    public const int MapSizeX = 11;
+    public const int MapSizeY = 11;
 
     public eMapAreaKind[] StandardMap_1th = new eMapAreaKind[3];
     private Dictionary<eMapAreaKind, int> StandardMap_2th = new Dictionary<eMapAreaKind, int>();
@@ -192,13 +192,12 @@ public class Global_MapManager : MonoBehaviour
 
     protected void SetPlayerPosition()
     {
-        MapDataXY[(int)Mathf.Round(MapSizeX * 0.5f), (int)Mathf.Round(MapSizeY * 0.5f)].ChangeTiled(eMapTileKind.Player);
+        MapDataXY[(int)Mathf.Floor(MapSizeX * 0.5f), (int)Mathf.Floor(MapSizeY * 0.5f)].ChangeTiled(eMapTileKind.Player);
     }
 
 
     /*
-    * 중앙 5,5 지점은 디폴트 플레이어 지점, 특수한 경우 지점 이탈
-    * 플레이어지점은 모든 배치가 끝난 직후, 그위에 변경 배치됨
+
     * 
     * 10의 랜덤 수치를 분배해서 자원, 특수 공간 배치됨
     * 
