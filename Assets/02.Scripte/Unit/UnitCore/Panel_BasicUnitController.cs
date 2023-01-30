@@ -36,14 +36,14 @@ public class Panel_BasicUnitController : MonoBehaviour
     [HideInInspector]
     public UnitPool _poolUnit = null;
 
-    private bool InitCheck = false;
+    protected bool InitCheck = false;
 
     private void Start()
     {
         StartCoroutine(DelayStart());
     }
 
-    protected IEnumerator DelayStart()
+    protected virtual IEnumerator DelayStart()
     {
         yield return null;
         _poolUnit = new UnitPool();
@@ -73,7 +73,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         InitCheck = true;
     }
 
-    protected void Init()
+    protected virtual void Init()
     {
         switch (unitState._AIType)
         {
@@ -120,7 +120,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     /// <br> 에디터에 배치된 유닛들이 게임매니저의 인스턴스 생성과정보다 빠를 경우 이 함수가 실행됩니다. </br>
     /// </summary>
     /// <returns></returns>
-    protected IEnumerator StandbyGameManager()
+    protected virtual IEnumerator StandbyGameManager()
     {
         while (GameManager._instance == null || AI == null)
         {
@@ -131,12 +131,12 @@ public class Panel_BasicUnitController : MonoBehaviour
         AI.AutoScheduler(ePattern.Continue);
     }
 
-    public void OnPoolEnable()
+    public virtual void OnPoolEnable()
     {
         StartCoroutine(DelayEnable());
     }
 
-    public IEnumerator DelayEnable()
+    public virtual IEnumerator DelayEnable()
     {
         while (InitCheck == false)
         {
@@ -153,7 +153,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
     }
 
-    public void OnPoolDisable()
+    public virtual void OnPoolDisable()
     {
         if (_HPbar != null) _HPbar._isAssign = false;
         GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
@@ -162,7 +162,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public bool EventDamage(Panel_BasicUnitController opponent)
+    public virtual bool EventDamage(Panel_BasicUnitController opponent)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState);
         if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
@@ -170,7 +170,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         return check;
     }
 
-    public bool EventDamage(Panel_BasicUnitController opponent, bool IgnoreDefend, bool IgnoreProtect)
+    public virtual bool EventDamage(Panel_BasicUnitController opponent, bool IgnoreDefend, bool IgnoreProtect)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState, IgnoreDefend, IgnoreProtect);
         if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
@@ -179,20 +179,20 @@ public class Panel_BasicUnitController : MonoBehaviour
     }
 
 
-    IEnumerator OnEffectAttacked()
+    public virtual IEnumerator OnEffectAttacked()
     {
 
         yield break;
     }
 
-    IEnumerator OnEffectProjectile()
+    public virtual IEnumerator OnEffectProjectile()
     {
         yield return new WaitForSeconds(_animationTime_attackStart);
         yield break;
     }
 
 
-    protected void GameUnitInit()
+    protected virtual void GameUnitInit()
     {
         unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
@@ -203,7 +203,7 @@ public class Panel_BasicUnitController : MonoBehaviour
         UpdateAIVariable();
     }
 
-    protected void UpdateAIVariable()
+    protected virtual void UpdateAIVariable()
     {
         AI._cognitiveRange.radius = unitState._cognitveRange;
         AI.delayAttackTiming = new WaitForSeconds(_animationTime_attackStart);

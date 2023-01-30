@@ -1,17 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnitGaugeSample;
-using static Panel_BasicUnitAI;
 using UnitSample;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Panel_PlayerController : Panel_BasicUnitController
 {
     private Graphic_PlayerStat _playerStat = null;
+    public LayerMask _rayMask;
 
-    private bool InitCheck = false;
-
-    private new IEnumerator DelayStart()
+    protected override IEnumerator DelayStart()
     {
         yield return null;
         _poolUnit = new UnitPool();
@@ -41,7 +38,7 @@ public class Panel_PlayerController : Panel_BasicUnitController
         InitCheck = true;
     }
 
-    private new void Init()
+    protected override void Init()
     {
         _playerStat = gameObject.AddComponent<Graphic_PlayerStat>();
 
@@ -62,12 +59,12 @@ public class Panel_PlayerController : Panel_BasicUnitController
     }
 
 
-    public new void OnPoolEnable()
+    public override void OnPoolEnable()
     {
         StartCoroutine(DelayEnable());
     }
 
-    public new IEnumerator DelayEnable()
+    public override IEnumerator DelayEnable()
     {
         while (InitCheck == false)
         {
@@ -80,14 +77,14 @@ public class Panel_PlayerController : Panel_BasicUnitController
         if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
     }
 
-    public new void OnPoolDisable()
+    public override void OnPoolDisable()
     {
         if (_HPbar != null) _HPbar._isAssign = false;
 
         gameObject.SetActive(false);
     }
 
-    public new bool EventDamage(Panel_BasicUnitController opponent)
+    public override bool EventDamage(Panel_BasicUnitController opponent)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState);
         if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
@@ -95,7 +92,7 @@ public class Panel_PlayerController : Panel_BasicUnitController
         return check;
     }
 
-    public new bool EventDamage(Panel_BasicUnitController opponent, bool IgnoreDefend, bool IgnoreProtect)
+    public override bool EventDamage(Panel_BasicUnitController opponent, bool IgnoreDefend, bool IgnoreProtect)
     {
         bool check = unitState.CalculatorDamage(opponent.unitState, IgnoreDefend, IgnoreProtect);
         if (check == false) GameManager._instance._unitManager.OnStateChangeUnit(opponent.gameObject.GetInstanceID());
@@ -104,20 +101,20 @@ public class Panel_PlayerController : Panel_BasicUnitController
     }
 
 
-    IEnumerator OnEffectAttacked()
+    public override IEnumerator OnEffectAttacked()
     {
 
         yield break;
     }
 
-    IEnumerator OnEffectProjectile()
+    public override IEnumerator OnEffectProjectile()
     {
         yield return new WaitForSeconds(_animationTime_attackStart);
         yield break;
     }
 
 
-    protected new void GameUnitInit()
+    protected override void GameUnitInit()
     {
         unitState = new Data_NormalUnit.UnitState((int)unitKind);
 
@@ -125,6 +122,20 @@ public class Panel_PlayerController : Panel_BasicUnitController
 
         _model.SetMesh(unitKind);
 
-        UpdateAIVariable();
+    }
+
+
+    public void OnClickMovePoint(InputAction.CallbackContext context)
+    {
+        if (context.started == true)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray,out hit,100f, _rayMask))
+            {
+                _playerStat.OnUnitMove(hit);
+            }
+        }
     }
 }

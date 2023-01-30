@@ -2,11 +2,11 @@
     "name": "PlayerControl",
     "maps": [
         {
-            "name": "New action map",
+            "name": "Player",
             "id": "3aa930a5-b5d9-4268-91d5-c7a56d223f6f",
             "actions": [
                 {
-                    "name": "New action",
+                    "name": "Move",
                     "type": "Button",
                     "id": "d4c4dd78-f2a8-4916-85b3-c40bed807182",
                     "expectedControlType": "Button",
@@ -19,22 +19,11 @@
                 {
                     "name": "",
                     "id": "1fb8e9e9-cf5d-426a-910e-bd21fe847b01",
-                    "path": "",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "PC",
-                    "action": "New action",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a91e8467-01de-4f4a-8933-2c68eda8df05",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mobile;PC",
-                    "action": "New action",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

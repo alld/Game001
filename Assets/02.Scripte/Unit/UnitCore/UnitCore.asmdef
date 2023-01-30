@@ -4,7 +4,8 @@
     "references": [
         "Data",
         "MainEngine",
-        "Skill"
+        "Skill",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
