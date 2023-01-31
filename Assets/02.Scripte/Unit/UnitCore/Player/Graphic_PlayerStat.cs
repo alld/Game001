@@ -43,7 +43,7 @@ public class Graphic_PlayerStat : MonoBehaviour
             unitCtrl.Move(TargetMovePointVec3(hit.point, _player.unitState._moveSpeed));
             HPBarMove();
             if (_isSkip == true) break;
-            if (Vector3.Distance(transform.position, hit.point) < 1f) _isMoving = false;
+            if (Vector3.Distance(transform.position, hit.point) < 0.1f) _isMoving = false;
             yield return temp_deltaTime;
         }
         _currentAction = null;

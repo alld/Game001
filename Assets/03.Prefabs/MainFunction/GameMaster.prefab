@@ -89,11 +89,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _players:
-  - _name: "\uD50C\uB808\uC774\uC5B4"
+  - _name: None
     _number: 0
     _isTeam: 010000
     _isEnemy: 000101
-  - _name: "\uD50C\uB808\uC774\uC5B4\uC720\uB2DB"
+  - _name: "\uD50C\uB808\uC774\uC5B4"
     _number: 1
     _isTeam: 000100
     _isEnemy: 010001
@@ -185,6 +185,7 @@ Transform:
   - {fileID: 1688695869608274224}
   - {fileID: 1624109095411052808}
   - {fileID: 6607937426221985425}
+  - {fileID: 7134645052046849352}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -200,13 +201,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.28
+  gameVersion: 0.29
+  _checkIntro: 0
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
   _unitManager: {fileID: 3624849549878341945}
   _mapManager: {fileID: 2138154083336503566}
   _gameSetting: {fileID: 8233259764772136063}
   _textManager: {fileID: 6710242528502293111}
+  _waveManager: {fileID: 490680675993922121}
 --- !u!1 &1953529289373026573
 GameObject:
   m_ObjectHideFlags: 0
@@ -384,3 +387,52 @@ MonoBehaviour:
   StandardMap_1th: 02000000040000000500000007000000
   _completSetting: 0
   _completReady: 0
+--- !u!1 &3713172376417750935
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7134645052046849352}
+  - component: {fileID: 490680675993922121}
+  m_Layer: 0
+  m_Name: WaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7134645052046849352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3713172376417750935}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1904746496601863005}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &490680675993922121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3713172376417750935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12414af0dffbec546b33deeb6f0ff70b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WaveLevel: []
+  _currentWaveLevel: 0
+  _currentUnitGroup: []
+  _currentUnitCount: 0
+  _fisrtStartWaveDelayTime: 10

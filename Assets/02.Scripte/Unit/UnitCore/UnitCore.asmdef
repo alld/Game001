@@ -2,10 +2,10 @@
     "name": "UnitCore",
     "rootNamespace": "",
     "references": [
-        "Data",
         "MainEngine",
         "Skill",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

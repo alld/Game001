@@ -18,7 +18,7 @@ public class Panel_PlayerController : Panel_BasicUnitController
 
         _poolUnit.OnActived = OnPoolEnable;
         _poolUnit.OnUnActived = OnPoolDisable;
-        if (unitKind == eUnitKind.None) // À¯´ÖÇ®¿¡¼­ »ý¼ºµÈ À¯´Ö 
+        if (_unitKind == Global_UnitManager.eUnitKind.None) // À¯´ÖÇ®¿¡¼­ »ý¼ºµÈ À¯´Ö 
         {
             gameObject.SetActive(false);
 
@@ -30,21 +30,19 @@ public class Panel_PlayerController : Panel_BasicUnitController
 
             GameManager._instance._unitManager.PoolCheckUnit();
 
-            _poolUnit.OnActived();
+            _poolUnit.OnActived(Global_UnitManager.eUnitKind.None, 0, false);
         }
-
-        Init();
-
-        InitCheck = true;
     }
 
-    protected override void Init()
+    protected override void AIInit()
     {
         _playerStat = gameObject.AddComponent<Graphic_PlayerStat>();
 
         _playerStat._animator = _model._animator;
 
         _playerStat.Init();
+
+        _playerStat.HPBarMove();
     }
 
     private void InitHPbar()
@@ -54,30 +52,27 @@ public class Panel_PlayerController : Panel_BasicUnitController
         _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
 
         _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
-
-        _playerStat.HPBarMove();
     }
 
 
-    public override void OnPoolEnable()
+    public override IEnumerator DelayEnable(Global_UnitManager.eUnitKind unitKind, int teamNumber, bool isWave)
     {
-        StartCoroutine(DelayEnable());
-    }
+        yield return null;
 
-    public override IEnumerator DelayEnable()
-    {
-        while (InitCheck == false)
-        {
-            yield return null;
-        }
+        if (unitKind != Global_UnitManager.eUnitKind.None) _unitKind = unitKind;
 
         GameUnitInit();
+
+        AIInit();
+
+        unitState._isWaveUnit = isWave;
+        if (teamNumber != 0) unitState._TeamNumber = teamNumber;
 
 
         if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
     }
 
-    public override void OnPoolDisable()
+    public override void OnPoolDisable(Global_UnitManager.eUnitKind unitKind, int teamNumber, bool isWave)
     {
         if (_HPbar != null) _HPbar._isAssign = false;
 
@@ -116,11 +111,11 @@ public class Panel_PlayerController : Panel_BasicUnitController
 
     protected override void GameUnitInit()
     {
-        unitState = new Data_NormalUnit.UnitState((int)unitKind);
+        unitState = new Data_NormalUnit.UnitState((int)_unitKind);
 
         InitHPbar();
 
-        _model.SetMesh(unitKind);
+        _model.SetMesh(_unitKind);
 
     }
 

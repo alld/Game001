@@ -142,7 +142,11 @@ public class Data_BasicUnitData
         public bool _rangeattack;
 
         /// <summary> 시체가 썩는 유무를 결정합니다. 해당 유닛이 썩을 경우 부활이나 시체활용이 가능한 객체입니다. </summary>
-        public bool _isRotting; 
+        public bool _isRotting;
+
+        /// <summary> 주요 타겟입니다. 해당유닛은 주변에 유닛이 없을때 해당 유닛에대한 행위를 합니다. </summary>
+        public GameObject _mainTarget;
+        public bool _isWaveUnit;
         public UnitState(int ID)
         {
             this.ID = ID;
@@ -198,6 +202,8 @@ public class Data_BasicUnitData
             this._rangeattack = json[ID]["_rangeattack"].ToObject<bool>();
 
             this._isRotting = true;
+            this._mainTarget = null;
+            this._isWaveUnit = false;
         }
 
         /// <summary>

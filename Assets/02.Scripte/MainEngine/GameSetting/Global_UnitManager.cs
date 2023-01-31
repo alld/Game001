@@ -7,6 +7,15 @@ using UnitFlowTextSample;
 
 public class Global_UnitManager : MonoBehaviour
 {
+    public enum eUnitKind
+    {
+        None,
+        A,
+        B,
+        C
+    }
+
+
     [Header("오브젝트 풀")]
     public GameObject canvas;
     private const int AddNumber = 5;
@@ -26,6 +35,16 @@ public class Global_UnitManager : MonoBehaviour
     private void OnDestroy()
     {
         OnStateChangeUnit = null;
+    }
+
+    public GameObject CreateUnit(eUnitKind unitKind, Vector3 CreatePoint,int teamNumber,bool isWave = false)
+    {
+        var NewUnit = GetPoolUnit();
+        NewUnit._thisObject.transform.position = CreatePoint;
+        //NewUnit.GetComponent<Data_BasicUnitData>();
+
+        NewUnit.OnActived(unitKind, teamNumber, isWave);
+        return NewUnit._thisObject;
     }
 
 
@@ -129,7 +148,7 @@ public class Global_UnitManager : MonoBehaviour
 
     public void PoolRemoveUnit(int poolnumber)
     {
-        _poolUnit[poolnumber].OnUnActived();
+        _poolUnit[poolnumber].OnUnActived(eUnitKind.None, 0, false);
         _poolUnit[poolnumber]._isAssign = false;
         _poolHPBar_count.Add(poolnumber);
     }
@@ -139,7 +158,7 @@ public class Global_UnitManager : MonoBehaviour
         _poolUnit_count.Clear();
         for (int i = 0; i < _poolUnit.Count -1; i++)
         {
-            _poolUnit[i].OnUnActived();
+            _poolUnit[i].OnUnActived(eUnitKind.None, 0, false);
             _poolUnit[i]._isAssign = false;
             _poolHPBar_count.Add(i);
         }
@@ -185,7 +204,7 @@ namespace UnitSample
     {
         public GameObject _thisObject;
 
-        public delegate void DeleUnitActive();
+        public delegate void DeleUnitActive(Global_UnitManager.eUnitKind unitKind,int teamNumber, bool isWave);
         public DeleUnitActive OnActived;
         public DeleUnitActive OnUnActived;
         

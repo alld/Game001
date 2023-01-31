@@ -75,6 +75,12 @@ public class Global_MapManager : MonoBehaviour
     public bool _completSetting = false;
     public bool _completReady = false;
 
+    public Vector3 GetRegenPoint(bool isRandom = false, bool isRepeat = false, bool isdungeon = false)
+    {
+
+        return Vector3.zero;
+    }
+
     public void CreateField(Transform field)
     {
         GameObject temp_object;

@@ -1,19 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnitGaugeSample;
-using static Panel_BasicUnitAI;
 using UnitSample;
+using UnityEngine;
+using static Panel_BasicUnitAI;
 
 public class Panel_BasicUnitController : MonoBehaviour
 {
-    public enum eUnitKind
-    {
-        None,
-        A,
-        B,
-        C
-    }
 
     /// <summary> (prefab) 투사체 프리팹입니다. </summary>
     public GameObject _projectile;
@@ -26,7 +18,7 @@ public class Panel_BasicUnitController : MonoBehaviour
     public float _animationTime_attackEnd = 1f;
     public float _animationTime_attacked = 1f;
 
-    public eUnitKind unitKind = eUnitKind.None;
+    public Global_UnitManager.eUnitKind _unitKind = Global_UnitManager.eUnitKind.None;
     // 고려
     public Data_NormalUnit.UnitState unitState;
     private Panel_BasicUnitAI AI = null;
@@ -53,7 +45,7 @@ public class Panel_BasicUnitController : MonoBehaviour
 
         _poolUnit.OnActived = OnPoolEnable;
         _poolUnit.OnUnActived = OnPoolDisable;
-        if (unitKind == eUnitKind.None) // 유닛풀에서 생성된 유닛 
+        if (_unitKind == Global_UnitManager.eUnitKind.None) // 유닛풀에서 생성된 유닛 
         {
             gameObject.SetActive(false);
 
@@ -65,15 +57,11 @@ public class Panel_BasicUnitController : MonoBehaviour
 
             GameManager._instance._unitManager.PoolCheckUnit();
 
-            _poolUnit.OnActived();
+            _poolUnit.OnActived(Global_UnitManager.eUnitKind.None, 0, false);
         }
-
-        Init();
-
-        InitCheck = true;
     }
 
-    protected virtual void Init()
+    protected virtual void AIInit()
     {
         switch (unitState._AIType)
         {
@@ -101,7 +89,12 @@ public class Panel_BasicUnitController : MonoBehaviour
 
         AI.animator = _model._animator;
 
+
         AI.InitAI();
+
+        UpdateAIVariable();
+
+        AI.HPBarMove();
     }
 
     private void InitHPbar()
@@ -111,8 +104,6 @@ public class Panel_BasicUnitController : MonoBehaviour
         _HPbar.UpdateGauage(unitState.maxHP, unitState._HP);
 
         _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
-
-        AI.HPBarMove();
     }
 
     /// <summary>
@@ -131,19 +122,23 @@ public class Panel_BasicUnitController : MonoBehaviour
         AI.AutoScheduler(ePattern.Continue);
     }
 
-    public virtual void OnPoolEnable()
+    public virtual void OnPoolEnable(Global_UnitManager.eUnitKind unitKind, int teamNumber, bool isWave)
     {
-        StartCoroutine(DelayEnable());
+        StartCoroutine(DelayEnable(unitKind, teamNumber, isWave));
     }
 
-    public virtual IEnumerator DelayEnable()
+    public virtual IEnumerator DelayEnable(Global_UnitManager.eUnitKind unitKind, int teamNumber, bool isWave)
     {
-        while (InitCheck == false)
-        {
-            yield return null;
-        }
+        yield return null;
+
+        if (unitKind != Global_UnitManager.eUnitKind.None) _unitKind = unitKind;
 
         GameUnitInit();
+
+        AIInit();
+
+        unitState._isWaveUnit = isWave;
+        if (teamNumber != 0) unitState._TeamNumber = teamNumber;
 
         GameManager._instance._unitManager.OnStateChangeUnit += AI.OnChangingEvent;
         AI.AutoScheduler(ePattern.Continue);
@@ -153,10 +148,12 @@ public class Panel_BasicUnitController : MonoBehaviour
         if (_HPbar._bar != null) _HPbar._isActive = GameManager._instance._gameSetting._GS_UnitHPBar;
     }
 
-    public virtual void OnPoolDisable()
+    public virtual void OnPoolDisable(Global_UnitManager.eUnitKind unitKind, int teamNumber, bool isWave)
     {
         if (_HPbar != null) _HPbar._isAssign = false;
         GameManager._instance._unitManager.OnStateChangeUnit -= AI.OnChangingEvent;
+
+        if (unitState._isWaveUnit == true) GameManager._instance._waveManager.CheckWaveUnitDieCount();
 
         AI._cognitiveRange.enabled = false;
         gameObject.SetActive(false);
@@ -194,13 +191,11 @@ public class Panel_BasicUnitController : MonoBehaviour
 
     protected virtual void GameUnitInit()
     {
-        unitState = new Data_NormalUnit.UnitState((int)unitKind);
+        unitState = new Data_NormalUnit.UnitState((int)_unitKind);
 
         InitHPbar();
 
-        _model.SetMesh(unitKind);
-
-        UpdateAIVariable();
+        _model.SetMesh(_unitKind);
     }
 
     protected virtual void UpdateAIVariable()

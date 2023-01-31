@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public string gameVersion = "0.00";
     public static bool FinishSetting = false;
 
+    public bool _checkIntro = false;
+
     public enum SceneN
     {
         Intro,
@@ -26,6 +28,8 @@ public class GameManager : MonoBehaviour
     public Global_MapManager _mapManager = null;
     public Global_GameSetting _gameSetting = null;
     public Global_TextManager _textManager = null;
+    public Global_WaveManager _waveManager = null;
+
 
 
 
@@ -39,6 +43,12 @@ public class GameManager : MonoBehaviour
         else { Destroy(this.gameObject); }
 
         GameInit();
+    }
+
+    public void Start()
+    {
+        //중도 씬 진행시 기본값을 셋팅하기위한 설정 
+        if(_checkIntro == false) _mapManager._completReady = true;
     }
 
     /// <summary>
@@ -56,6 +66,8 @@ public class GameManager : MonoBehaviour
         _teamSetting.Init(); // 팀설정이 제대로되어있는지 확인합니다. 
 
         _unitManager.Init();
+
+        _waveManager.Init();
 
         FinishSetting = true; // 모든 설정이 끝나면 메인씬을 불러옵니다.
 
