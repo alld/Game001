@@ -201,7 +201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44b0163c404e97b4581a7d31f4c56fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 0.29
+  gameVersion: 0.30
   _checkIntro: 0
   _teamSetting: {fileID: 1904746495324066716}
   _logManager: {fileID: 1904746495449514048}
@@ -384,6 +384,7 @@ MonoBehaviour:
   MapDataList: []
   _editorSetting: 0
   _initMapPointCount: 10
+  DungeonList: []
   StandardMap_1th: 02000000040000000500000007000000
   _completSetting: 0
   _completReady: 0
@@ -433,6 +434,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WaveLevel: []
   _currentWaveLevel: 0
-  _currentUnitGroup: []
+  _currentUnitGroup: 
   _currentUnitCount: 0
   _fisrtStartWaveDelayTime: 10

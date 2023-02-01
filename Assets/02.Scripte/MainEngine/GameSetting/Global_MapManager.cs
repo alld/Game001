@@ -62,6 +62,7 @@ public class Global_MapManager : MonoBehaviour
     public List<MapData> MapDataList = new List<MapData>();
     public bool _editorSetting;
     public int _initMapPointCount = 10;
+    public List<MapData> DungeonList = new List<MapData>();
 
     public MapData[,] MapDataXY = new MapData[MapSizeX, MapSizeY];
 
@@ -77,8 +78,86 @@ public class Global_MapManager : MonoBehaviour
 
     public Vector3 GetRegenPoint(bool isRandom = false, bool isRepeat = false, bool isdungeon = false)
     {
+        int temp_int = 0;
 
-        return Vector3.zero;
+        if (isdungeon == false)
+        {
+            if (isRandom == true) // 전체 랜덤
+            {
+                while (true)
+                {
+                    temp_int = Random.Range(0, MapDataList.Count);
+                    if (isRepeat == false && MapDataList[temp_int]._isRegen == true)
+                    {
+                        continue;
+                    }
+                    if (MapDataList[temp_int]._thisMapTile != eMapTileKind.Player)
+                    {
+                        break;
+                    }
+                }
+                MapDataList[temp_int]._isRegen = true;
+                return MapDataList[temp_int]._thisRegenPoint.position;
+            }
+            else // 외곽 랜덤(물제외) // 수정요망
+            {
+                if(Random.Range(0,2) == 0)
+                {
+                    temp_int = Random.Range(0, MapSizeX);
+                    MapDataXY[temp_int, 0]._isRegen = true;
+                    return MapDataXY[temp_int, 0]._thisRegenPoint.position;
+                }
+                else
+                {
+                    temp_int = Random.Range(0, MapSizeY);
+                    MapDataXY[0, temp_int]._isRegen = true;
+                    return MapDataXY[0, temp_int]._thisRegenPoint.position;
+                }
+            }
+        }
+        else
+        {
+            if (DungeonList.Count == 0) return Vector3.zero; // 던전이 1개도 없는 경우
+            if (isRepeat == false) // 던전 중복 불가
+            {
+                bool checkDungeon = false;
+                foreach (var mapData in DungeonList)
+                {
+                    if (mapData._isRegen == false) checkDungeon = true;
+                }
+                if (checkDungeon == true) // 던전중 아직 생성되지않은곳이 있는 경우
+                {
+                    while (true)
+                    {
+                        temp_int = Random.Range(0, DungeonList.Count);
+                        if (DungeonList[temp_int]._isRegen == false) break;
+                    }
+
+                    MapDataList[temp_int]._isRegen = true;
+                    return MapDataList[temp_int]._thisRegenPoint.position;
+                }
+                else // 기존 모든 던전에서 1회이상 생성이 된 경우
+                {
+                    temp_int = Random.Range(0, DungeonList.Count);
+                    MapDataList[temp_int]._isRegen = true;
+                    return MapDataList[temp_int]._thisRegenPoint.position;
+                }
+            }
+            else // 던전 중복허용
+            {
+                temp_int = Random.Range(0, DungeonList.Count);
+                DungeonList[temp_int]._isRegen = true;
+                return DungeonList[temp_int]._thisRegenPoint.position;
+            }
+        }
+    }
+
+    public void WaveFieldReset()
+    {
+        foreach (var mapData in MapDataList)
+        {
+            mapData._isRegen = false;
+        }
     }
 
     public void CreateField(Transform field)
@@ -191,6 +270,8 @@ public class Global_MapManager : MonoBehaviour
 
         SetInitRandomTiledData();
 
+        SetDungeon();
+
         SetPlayerPosition();
 
         _completSetting = true;
@@ -201,6 +282,13 @@ public class Global_MapManager : MonoBehaviour
         MapDataXY[(int)Mathf.Floor(MapSizeX * 0.5f), (int)Mathf.Floor(MapSizeY * 0.5f)].ChangeTiled(eMapTileKind.Player);
     }
 
+    protected void SetDungeon()
+    {
+        foreach (var mapData in MapDataList)
+        {
+            if (mapData._isDungeon) DungeonList.Add(mapData);
+        }
+    }
 
     /*
 
@@ -236,12 +324,14 @@ namespace MapSample
 
         public eMapTileKind _thisMapTile = eMapTileKind.None;
         public Transform _thisObject;
+        public Transform _thisRegenPoint;
         public GameObject _mapFloor;
         public bool _isAssignAddPoint = false;
         public Dictionary<eMapTileKind, int> _thisTilePoint = new Dictionary<eMapTileKind, int>();
         private MapData[,] mm_MapData; // 맵 매니저의 캐시
         public bool _isDungeon;
         public bool _isBoundaryConnect;
+        public bool _isRegen;
 
         public MeshRenderer tempMesh; // 임시 테스트용
 

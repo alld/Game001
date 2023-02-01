@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class Global_WaveManager : MonoBehaviour
 {
     public List<WaveInfo> WaveLevel = new List<WaveInfo>();
     public int _currentWaveLevel = 0;
-    public List<GameObject> _currentUnitGroup = new List<GameObject>();
+    public List<int> _currentUnitGroup = new List<int>();
     public int _currentUnitCount = 0;
 
     [Range(10, 600)]
@@ -49,10 +50,16 @@ public class Global_WaveManager : MonoBehaviour
     {
         if(waveInfo._field == Vector3.zero)
         {
-            waveInfo._field = GameManager._instance._mapManager.GetRegenPoint(true);
+            waveInfo._field = GameManager._instance._mapManager.GetRegenPoint();
+            if (waveInfo._field == Vector3.zero)
+            {
+                NextWave();
+                yield break;
+            }
         }
         _currentUnitCount = 0;
         _currentUnitGroup.Clear();
+        GameManager._instance._mapManager.WaveFieldReset();
         yield return waveInfo._delayStart;
         for (int i = 0; i < waveInfo._units.Count; i++)
         {
@@ -74,6 +81,18 @@ public class Global_WaveManager : MonoBehaviour
             _currentWaveLevel++;
             StartCoroutine(CreateWave(WaveLevel[_currentWaveLevel]));
         }
+    }
+
+    public void NextWave()
+    {
+        foreach (var unit in _currentUnitGroup)
+        {
+            GameManager._instance._unitManager.PoolRemoveUnit(unit);
+        }
+        _currentUnitCount = 0;
+        _currentUnitGroup.Clear();
+
+        CheckWaveUnitDieCount();
     }
 
     private void LastStage()

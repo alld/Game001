@@ -37,14 +37,14 @@ public class Global_UnitManager : MonoBehaviour
         OnStateChangeUnit = null;
     }
 
-    public GameObject CreateUnit(eUnitKind unitKind, Vector3 CreatePoint,int teamNumber,bool isWave = false)
+    public int CreateUnit(eUnitKind unitKind, Vector3 CreatePoint,int teamNumber,bool isWave = false)
     {
         var NewUnit = GetPoolUnit();
         NewUnit._thisObject.transform.position = CreatePoint;
         //NewUnit.GetComponent<Data_BasicUnitData>();
 
         NewUnit.OnActived(unitKind, teamNumber, isWave);
-        return NewUnit._thisObject;
+        return NewUnit.poolNumber;
     }
 
 
@@ -208,7 +208,7 @@ namespace UnitSample
         public DeleUnitActive OnActived;
         public DeleUnitActive OnUnActived;
         
-        private int poolNumber;
+        public int poolNumber;
         private bool isAssign = false;
         public bool _isAssign 
         {

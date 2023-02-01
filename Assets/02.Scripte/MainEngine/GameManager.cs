@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     public string gameVersion = "0.00";
     public static bool FinishSetting = false;
 
+    [HideInInspector]
     public bool _checkIntro = false;
 
     public enum SceneN
